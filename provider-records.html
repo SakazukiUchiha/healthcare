@@ -62,71 +62,268 @@
             <nav class="bg-green-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
                     <h1 class="text-white text-2xl font-bold">Medical Records</h1>
-                    <button onclick="location.href='login.html'" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
+                    <button onclick="logout()" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
                 <div class="grid grid-cols-1 gap-6">
+                    <!-- Create New Record Section -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h2 class="text-xl font-bold mb-4">Create New Medical Record</h2>
+                        <form id="newRecordForm" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Select Patient</label>
+                                    <select id="patientSelect" class="w-full p-2 border rounded" required>
+                                        <option value="">Select a patient...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Record Type</label>
+                                    <select id="recordType" class="w-full p-2 border rounded" required>
+                                        <option value="">Select type...</option>
+                                        <option value="General Check-up">General Check-up</option>
+                                        <option value="Follow-up">Follow-up</option>
+                                        <option value="Consultation">Consultation</option>
+                                        <option value="Lab Results">Lab Results</option>
+                                        <option value="Vaccination">Vaccination</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Diagnosis</label>
+                                <textarea id="diagnosis" class="w-full p-2 border rounded" rows="3" required></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Prescription</label>
+                                <textarea id="prescription" class="w-full p-2 border rounded" rows="3"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Notes</label>
+                                <textarea id="notes" class="w-full p-2 border rounded" rows="3"></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                                    Create Record
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Search Records Section -->
                     <div class="bg-white p-6 rounded-lg shadow">
                         <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Search Records</h2>
                             <div class="flex space-x-2">
-                                <input type="text" placeholder="Search records..." class="p-2 border rounded">
-                                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Search</button>
+                                <input type="text" 
+                                       id="searchInput" 
+                                       placeholder="Search by patient name or record type..." 
+                                       class="p-2 border rounded w-64"
+                                       oninput="handleSearchInput(this.value)">
                             </div>
-                            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Create New Record</button>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full">
-                                <thead>
-                                    <tr class="bg-gray-50">
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">REC-001</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">John Doe</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">March 1, 2024</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">General Check-up</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex space-x-2">
-                                                <button class="text-green-600 hover:text-green-800">View</button>
-                                                <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                                <button class="text-red-600 hover:text-red-800">Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">REC-002</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">Jane Smith</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">February 28, 2024</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">Lab Results</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex space-x-2">
-                                                <button class="text-green-600 hover:text-green-800">View</button>
-                                                <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                                <button class="text-red-600 hover:text-red-800">Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <div class="text-gray-600">Showing 1-2 of 2 records</div>
-                            <div class="flex space-x-2">
-                                <button class="px-3 py-1 border rounded text-gray-600 hover:bg-gray-100">Previous</button>
-                                <button class="px-3 py-1 border rounded text-gray-600 hover:bg-gray-100">Next</button>
-                            </div>
+                        <div id="recordsList" class="space-y-4">
+                            <!-- Records will be loaded here -->
                         </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+
+    <!-- Record Details Modal -->
+    <div id="recordModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Medical Record Details</h3>
+                <button onclick="closeRecordModal()" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-gray-600">Patient</p>
+                    <p id="modalPatient" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Date</p>
+                    <p id="modalDate" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Record Type</p>
+                    <p id="modalType" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Diagnosis</p>
+                    <p id="modalDiagnosis" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Prescription</p>
+                    <p id="modalPrescription" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Notes</p>
+                    <p id="modalNotes" class="font-medium">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const providerId = localStorage.getItem('userId');
+        let searchTimeout;
+
+        // Add logout function
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        // Check if user is logged in and is a healthcare provider
+        window.addEventListener('load', () => {
+            const userRole = localStorage.getItem('userRole');
+            if (!localStorage.getItem('userId') || userRole !== 'healthcare-provider') {
+                window.location.href = '/login.html';
+                return;
+            }
+            fetchPatients();
+            searchRecords();
+        });
+
+        // Fetch patients for the select dropdown
+        async function fetchPatients() {
+            try {
+                const response = await fetch('/api/patients');
+                const patients = await response.json();
+                
+                const patientSelect = document.getElementById('patientSelect');
+                patients.forEach(patient => {
+                    const option = document.createElement('option');
+                    option.value = patient._id;
+                    option.textContent = patient.username;
+                    patientSelect.appendChild(option);
+                });
+
+                // If there's a selected patient from schedule, select them
+                const selectedPatientId = localStorage.getItem('selectedPatientId');
+                if (selectedPatientId) {
+                    patientSelect.value = selectedPatientId;
+                    localStorage.removeItem('selectedPatientId'); // Clear the selection
+                }
+            } catch (error) {
+                console.error('Error fetching patients:', error);
+            }
+        }
+
+        // Handle search input with debounce
+        function handleSearchInput(value) {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            searchTimeout = setTimeout(() => {
+                searchRecords(value);
+            }, 300);
+        }
+
+        // Search records
+        async function searchRecords(query = '') {
+            try {
+                const response = await fetch(`/api/medical-records/search?doctorId=${providerId}&query=${query}`);
+                const records = await response.json();
+
+                const recordsList = document.getElementById('recordsList');
+                
+                if (records.length === 0) {
+                    recordsList.innerHTML = '<p class="text-gray-500">No records found.</p>';
+                    return;
+                }
+
+                recordsList.innerHTML = records.map(record => `
+                    <div class="border p-4 rounded-lg hover:bg-gray-50">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold">${record.patientId.username}</h3>
+                                <p class="text-gray-600">Date: ${new Date(record.date).toLocaleDateString()}</p>
+                                <p class="text-gray-600">Type: ${record.recordType}</p>
+                            </div>
+                            <button onclick="viewRecordDetails('${record._id}')"
+                                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error searching records:', error);
+                document.getElementById('recordsList').innerHTML = 
+                    '<p class="text-red-500">Error loading records.</p>';
+            }
+        }
+
+        // Create new record
+        document.getElementById('newRecordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const recordData = {
+                patientId: document.getElementById('patientSelect').value,
+                doctorId: providerId,
+                recordType: document.getElementById('recordType').value,
+                diagnosis: document.getElementById('diagnosis').value,
+                prescription: document.getElementById('prescription').value,
+                notes: document.getElementById('notes').value
+            };
+
+            try {
+                const response = await fetch('/api/medical-records', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(recordData)
+                });
+
+                if (response.ok) {
+                    alert('Medical record created successfully');
+                    document.getElementById('newRecordForm').reset();
+                    searchRecords(); // Refresh the records list
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to create medical record');
+                }
+            } catch (error) {
+                console.error('Error creating medical record:', error);
+                alert('Error creating medical record');
+            }
+        });
+
+        // View record details
+        async function viewRecordDetails(recordId) {
+            try {
+                const response = await fetch(`/api/medical-records/${recordId}`);
+                const record = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('modalPatient').textContent = record.patientId.username;
+                    document.getElementById('modalDate').textContent = new Date(record.date).toLocaleDateString();
+                    document.getElementById('modalType').textContent = record.recordType;
+                    document.getElementById('modalDiagnosis').textContent = record.diagnosis;
+                    document.getElementById('modalPrescription').textContent = record.prescription || '-';
+                    document.getElementById('modalNotes').textContent = record.notes || '-';
+
+                    document.getElementById('recordModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching record details:', error);
+                alert('Error fetching record details');
+            }
+        }
+
+        // Close record modal
+        function closeRecordModal() {
+            document.getElementById('recordModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html> 

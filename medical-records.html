@@ -54,55 +54,143 @@
             <nav class="bg-blue-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
                     <h1 class="text-white text-2xl font-bold">Medical Records</h1>
-                    <button onclick="location.href='login.html'" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
+                    <button onclick="logout()" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
-                <div class="grid grid-cols-1 gap-6">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold mb-4">Recent Medical Records</h2>
-                        <div class="space-y-4">
-                            <div class="border-b pb-4">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="font-semibold">General Check-up</p>
-                                        <p class="text-gray-600">Dr. John Smith</p>
-                                        <p class="text-gray-600">Date: March 1, 2024</p>
-                                    </div>
-                                    <button class="text-blue-600 hover:text-blue-800">View Details</button>
-                                </div>
-                            </div>
-                            <div class="border-b pb-4">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="font-semibold">Blood Test Results</p>
-                                        <p class="text-gray-600">Lab: City Medical Lab</p>
-                                        <p class="text-gray-600">Date: February 15, 2024</p>
-                                    </div>
-                                    <button class="text-blue-600 hover:text-blue-800">View Details</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold mb-4">Prescriptions</h2>
-                        <div class="space-y-4">
-                            <div class="border-b pb-4">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="font-semibold">Amoxicillin 500mg</p>
-                                        <p class="text-gray-600">Dr. Sarah Johnson</p>
-                                        <p class="text-gray-600">Prescribed: March 5, 2024</p>
-                                        <p class="text-gray-600">Duration: 7 days</p>
-                                    </div>
-                                    <button class="text-blue-600 hover:text-blue-800">Download PDF</button>
-                                </div>
-                            </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold mb-4">My Medical Records</h2>
+                        <div id="recordsList" class="space-y-4">
+                            <!-- Records will be loaded here -->
+                            <div class="text-gray-500">Loading records...</div>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+
+    <!-- Record Details Modal -->
+    <div id="recordModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Medical Record Details</h3>
+                <button onclick="closeRecordModal()" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-gray-600">Doctor</p>
+                    <p id="modalDoctor" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Date</p>
+                    <p id="modalDate" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Record Type</p>
+                    <p id="modalType" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Diagnosis</p>
+                    <p id="modalDiagnosis" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Prescription</p>
+                    <p id="modalPrescription" class="font-medium">-</p>
+                </div>
+                <div>
+                    <p class="text-gray-600">Notes</p>
+                    <p id="modalNotes" class="font-medium">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const patientId = localStorage.getItem('userId');
+
+        // Add logout function
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Check if user is logged in and is a patient
+        window.addEventListener('load', () => {
+            const userRole = localStorage.getItem('userRole');
+            if (!localStorage.getItem('userId') || userRole !== 'patient') {
+                window.location.href = '/login.html';
+                return;
+            }
+            fetchMedicalRecords();
+        });
+
+        // Fetch medical records
+        async function fetchMedicalRecords() {
+            try {
+                const response = await fetch(`/api/medical-records/patient/${patientId}`);
+                const records = await response.json();
+
+                const recordsList = document.getElementById('recordsList');
+                
+                if (records.length === 0) {
+                    recordsList.innerHTML = '<p class="text-gray-500">No medical records found.</p>';
+                    return;
+                }
+
+                recordsList.innerHTML = records.map(record => `
+                    <div class="border p-4 rounded-lg hover:bg-gray-50">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold">Dr. ${record.doctorId.username}</h3>
+                                <p class="text-gray-600">Date: ${new Date(record.date).toLocaleDateString()}</p>
+                                <p class="text-gray-600">Type: ${record.recordType}</p>
+                            </div>
+                            <button onclick="viewRecordDetails('${record._id}')"
+                                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching medical records:', error);
+                document.getElementById('recordsList').innerHTML = 
+                    '<p class="text-red-500">Error loading medical records.</p>';
+            }
+        }
+
+        // View record details
+        async function viewRecordDetails(recordId) {
+            try {
+                const response = await fetch(`/api/medical-records/${recordId}`);
+                const record = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('modalDoctor').textContent = `Dr. ${record.doctorId.username}`;
+                    document.getElementById('modalDate').textContent = new Date(record.date).toLocaleDateString();
+                    document.getElementById('modalType').textContent = record.recordType;
+                    document.getElementById('modalDiagnosis').textContent = record.diagnosis;
+                    document.getElementById('modalPrescription').textContent = record.prescription;
+                    document.getElementById('modalNotes').textContent = record.notes;
+
+                    document.getElementById('recordModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching record details:', error);
+                alert('Error fetching record details');
+            }
+        }
+
+        // Close record modal
+        function closeRecordModal() {
+            document.getElementById('recordModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html> 
