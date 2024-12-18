@@ -54,7 +54,27 @@
             <nav class="bg-blue-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
                     <h1 class="text-white text-2xl font-bold">Dashboard</h1>
-                    <button onclick="logout()" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button onclick="toggleNotifications()" class="bg-white text-blue-600 px-4 py-2 rounded flex items-center">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                Notifications
+                                <span id="notificationCount" class="hidden ml-1 bg-red-500 text-white rounded-full px-2 text-xs"></span>
+                            </button>
+                            <!-- Notifications Dropdown -->
+                            <div id="notificationsDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50">
+                                <div class="p-4">
+                                    <h3 class="text-lg font-semibold mb-2">Notifications</h3>
+                                    <div id="notificationsList" class="space-y-2">
+                                        <!-- Notifications will be inserted here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="logout()" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
+                    </div>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
@@ -77,7 +97,9 @@
     <script>
         // Get user ID from localStorage (set during login)
         const userId = localStorage.getItem('userId');
-        
+        let notifications = [];
+        let ws;
+
         // Fetch and display appointments
         async function fetchAppointments() {
             try {
@@ -114,15 +136,152 @@
                                 <p class="text-gray-600">Date: ${formattedDate}</p>
                                 <p class="text-gray-600">Time: ${formattedTime}</p>
                                 <p class="text-gray-600">Type: ${appointment.type}</p>
+                                <p class="text-${appointment.status === 'cancelled' ? 'red' : 'green'}-600 font-semibold mt-2">
+                                    Status: ${appointment.status || 'Pending'}
+                                </p>
                             </div>
-                            <button onclick="cancelAppointment('${appointment._id}')"
-                                    class="text-red-600 hover:text-red-800">Cancel</button>
+                            ${appointment.status !== 'cancelled' ? `
+                                <button onclick="cancelAppointment('${appointment._id}')"
+                                        class="text-red-600 hover:text-red-800">Cancel</button>
+                            ` : ''}
                         </div>
                     `;
                     appointmentsContainer.appendChild(appointmentCard);
                 });
             } catch (error) {
                 console.error('Error fetching appointments:', error);
+            }
+        }
+
+        // Initialize WebSocket connection
+        function initializeWebSocket() {
+            ws = new WebSocket(window.location.origin.replace(/^http/, 'ws'));
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'appointment_update' && data.userId === userId) {
+                    // Refresh appointments and notifications when an update is received
+                    fetchAppointments();
+                    fetchNotifications();
+                }
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+
+            ws.onclose = function() {
+                // Try to reconnect after 5 seconds
+                setTimeout(initializeWebSocket, 5000);
+            };
+        }
+
+        // Fetch notifications
+        async function fetchNotifications() {
+            try {
+                const response = await fetch(`/api/notifications/${userId}`);
+                if (response.ok) {
+                    notifications = await response.json();
+                    updateNotificationsDisplay();
+                    
+                    // Also update appointments if there's a cancellation notification
+                    const hasCancellation = notifications.some(n => 
+                        n.type === 'appointment_cancelled' && !n.read
+                    );
+                    if (hasCancellation) {
+                        fetchAppointments();
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationsDropdown');
+            dropdown.classList.toggle('hidden');
+            
+            // Mark notifications as seen when opening dropdown
+            if (!dropdown.classList.contains('hidden')) {
+                fetchNotifications();
+            }
+        }
+
+        // Update notifications display
+        function updateNotificationsDisplay() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            const countElement = document.getElementById('notificationCount');
+            const listElement = document.getElementById('notificationsList');
+
+            // Update count
+            if (unreadCount > 0) {
+                countElement.textContent = unreadCount;
+                countElement.classList.remove('hidden');
+            } else {
+                countElement.classList.add('hidden');
+            }
+
+            // Update list
+            if (notifications.length === 0) {
+                listElement.innerHTML = '<p class="text-gray-500">No notifications</p>';
+                return;
+            }
+
+            // Sort notifications by date, newest first
+            const sortedNotifications = [...notifications].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+
+            listElement.innerHTML = sortedNotifications.map(notification => `
+                <div class="p-3 ${notification.read ? 'bg-gray-50' : 'bg-blue-50'} rounded-lg">
+                    <p class="text-sm ${notification.read ? 'text-gray-600' : 'text-blue-600'} font-medium">
+                        ${notification.message}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        ${new Date(notification.date).toLocaleString()}
+                    </p>
+                    <div class="flex justify-between items-center mt-2">
+                        ${!notification.read ? `
+                            <button onclick="markAsRead('${notification._id}')" 
+                                class="text-xs text-blue-600 hover:text-blue-800">
+                                Mark as read
+                            </button>
+                        ` : `
+                            <button onclick="deleteNotification('${notification._id}')"
+                                class="text-xs text-red-600 hover:text-red-800">
+                                Delete
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function markAsRead(notificationId) {
+            try {
+                const response = await fetch(`/api/notifications/${notificationId}/read`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    await fetchNotifications(); // Refresh notifications
+                }
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        async function deleteNotification(notificationId) {
+            try {
+                const response = await fetch(`/api/notifications/${notificationId}/read`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    await fetchNotifications(); // Refresh notifications
+                }
+            } catch (error) {
+                console.error('Error deleting notification:', error);
             }
         }
 
@@ -138,8 +297,9 @@
                 });
 
                 if (response.ok) {
-                    // Refresh appointments list
+                    // Refresh appointments list and notifications
                     fetchAppointments();
+                    fetchNotifications();
                 } else {
                     alert('Failed to cancel appointment');
                 }
@@ -149,19 +309,35 @@
             }
         }
 
-        // Check if user is logged in
-        if (!userId) {
-            location.href = 'login.html';
-        } else {
-            // Fetch appointments when page loads
+        // Initialize when page loads
+        function initialize() {
+            if (!userId) {
+                location.href = 'login.html';
+                return;
+            }
+
+            // Initialize WebSocket
+            initializeWebSocket();
+
+            // Initial fetches
             fetchAppointments();
+            fetchNotifications();
+
+            // Set up periodic notification checks
+            setInterval(fetchNotifications, 30000); // Check every 30 seconds
         }
 
         // Add logout function
         function logout() {
             localStorage.clear();
+            if (ws) {
+                ws.close();
+            }
             window.location.href = 'login.html';
         }
+
+        // Start the application
+        initialize();
     </script>
 </body>
 </html>

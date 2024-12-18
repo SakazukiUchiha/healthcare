@@ -81,42 +81,84 @@
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">Schedule Management</h2>
-                        <form class="space-y-4">
+                        <form id="scheduleForm" class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-gray-700 mb-2">Working Hours</label>
                                     <div class="flex space-x-2">
-                                        <select class="w-full p-2 border rounded">
-                                            <option>9:00 AM</option>
-                                            <option>8:00 AM</option>
-                                            <option>10:00 AM</option>
+                                        <select id="workingHoursStart" class="w-full p-2 border rounded" required>
+                                            <option value="">Start time...</option>
+                                            <option value="06:00">6:00 AM</option>
+                                            <option value="06:30">6:30 AM</option>
+                                            <option value="07:00">7:00 AM</option>
+                                            <option value="07:30">7:30 AM</option>
+                                            <option value="08:00">8:00 AM</option>
+                                            <option value="08:30">8:30 AM</option>
+                                            <option value="09:00">9:00 AM</option>
+                                            <option value="09:30">9:30 AM</option>
+                                            <option value="10:00">10:00 AM</option>
+                                            <option value="10:30">10:30 AM</option>
+                                            <option value="11:00">11:00 AM</option>
+                                            <option value="11:30">11:30 AM</option>
+                                            <option value="12:00">12:00 PM</option>
                                         </select>
                                         <span class="flex items-center">to</span>
-                                        <select class="w-full p-2 border rounded">
-                                            <option>5:00 PM</option>
-                                            <option>4:00 PM</option>
-                                            <option>6:00 PM</option>
+                                        <select id="workingHoursEnd" class="w-full p-2 border rounded" required>
+                                            <option value="">End time...</option>
+                                            <option value="12:00">12:00 PM</option>
+                                            <option value="12:30">12:30 PM</option>
+                                            <option value="13:00">1:00 PM</option>
+                                            <option value="13:30">1:30 PM</option>
+                                            <option value="14:00">2:00 PM</option>
+                                            <option value="14:30">2:30 PM</option>
+                                            <option value="15:00">3:00 PM</option>
+                                            <option value="15:30">3:30 PM</option>
+                                            <option value="16:00">4:00 PM</option>
+                                            <option value="16:30">4:30 PM</option>
+                                            <option value="17:00">5:00 PM</option>
+                                            <option value="17:30">5:30 PM</option>
+                                            <option value="18:00">6:00 PM</option>
+                                            <option value="18:30">6:30 PM</option>
+                                            <option value="19:00">7:00 PM</option>
+                                            <option value="19:30">7:30 PM</option>
+                                            <option value="20:00">8:00 PM</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-gray-700 mb-2">Break Time</label>
                                     <div class="flex space-x-2">
-                                        <select class="w-full p-2 border rounded">
-                                            <option>1:00 PM</option>
-                                            <option>12:00 PM</option>
-                                            <option>2:00 PM</option>
+                                        <select id="breakTimeStart" class="w-full p-2 border rounded" required>
+                                            <option value="">Start time...</option>
+                                            <option value="11:00">11:00 AM</option>
+                                            <option value="11:30">11:30 AM</option>
+                                            <option value="12:00">12:00 PM</option>
+                                            <option value="12:30">12:30 PM</option>
+                                            <option value="13:00">1:00 PM</option>
+                                            <option value="13:30">1:30 PM</option>
+                                            <option value="14:00">2:00 PM</option>
+                                            <option value="14:30">2:30 PM</option>
+                                            <option value="15:00">3:00 PM</option>
                                         </select>
                                         <span class="flex items-center">to</span>
-                                        <select class="w-full p-2 border rounded">
-                                            <option>2:00 PM</option>
-                                            <option>1:00 PM</option>
-                                            <option>3:00 PM</option>
+                                        <select id="breakTimeEnd" class="w-full p-2 border rounded" required>
+                                            <option value="">End time...</option>
+                                            <option value="12:00">12:00 PM</option>
+                                            <option value="12:30">12:30 PM</option>
+                                            <option value="13:00">1:00 PM</option>
+                                            <option value="13:30">1:30 PM</option>
+                                            <option value="14:00">2:00 PM</option>
+                                            <option value="14:30">2:30 PM</option>
+                                            <option value="15:00">3:00 PM</option>
+                                            <option value="15:30">3:30 PM</option>
+                                            <option value="16:00">4:00 PM</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
-                            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Update Schedule</button>
+                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                                Update Schedule
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -280,11 +322,22 @@
                             <h3 class="text-lg font-semibold">${appointment.patientName}</h3>
                             <p class="text-gray-600">Time: ${appointmentTime}</p>
                             <p class="text-gray-600">Type: ${appointment.reason}</p>
+                            <p class="text-gray-600">Status: ${appointment.status || 'Pending'}</p>
                         </div>
-                        <div class="flex space-x-2">
+                        <div class="flex flex-col space-y-2">
                             <button onclick="viewPatientDetails('${appointment.patientId}')" 
                                 class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                                 View Details
+                            </button>
+                            ${appointment.status !== 'accepted' ? `
+                                <button onclick="acceptAppointment('${appointment._id}', '${appointment.patientId}')" 
+                                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                                    Accept
+                                </button>
+                            ` : ''}
+                            <button onclick="cancelAppointment('${appointment._id}', '${appointment.patientId}')" 
+                                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                Cancel
                             </button>
                         </div>
                     </div>
@@ -298,26 +351,75 @@
             fetchAppointments();
         }
 
-        async function cancelAppointment(appointmentId) {
+        async function acceptAppointment(appointmentId, patientId) {
+            try {
+                const response = await fetch(`/api/appointments/${appointmentId}/accept`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Appointment accepted successfully');
+                    fetchAppointments();
+                } else {
+                    const data = await response.json();
+                    alert(`Failed to accept appointment: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error accepting appointment:', error);
+                alert('Failed to accept appointment. Please try again.');
+            }
+        }
+
+        async function cancelAppointment(appointmentId, patientId) {
             if (!confirm('Are you sure you want to cancel this appointment?')) {
                 return;
             }
 
             try {
-                const response = await fetch(`/api/appointments/${appointmentId}`, {
+                const response = await fetch(`/api/appointments/${appointmentId}?cancelledBy=provider`, {
                     method: 'DELETE'
                 });
 
                 if (response.ok) {
+                    // Send notification to patient
+                    await sendNotification(patientId, {
+                        type: 'appointment_cancelled',
+                        message: 'Your appointment has been cancelled by the doctor. Please book again at another time.',
+                        appointmentId: appointmentId
+                    });
+                    
                     alert('Appointment cancelled successfully');
                     fetchAppointments();
                 } else {
-                    const data = await response.json();
-                    alert(`Failed to cancel appointment: ${data.message}`);
+                    throw new Error('Failed to cancel appointment');
                 }
             } catch (error) {
                 console.error('Error cancelling appointment:', error);
                 alert('Failed to cancel appointment');
+            }
+        }
+
+        async function sendNotification(userId, notification) {
+            try {
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        ...notification
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send notification');
+                }
+            } catch (error) {
+                console.error('Error sending notification:', error);
             }
         }
 
@@ -364,6 +466,81 @@
         function closePatientModal() {
             document.getElementById('patientDetailsModal').classList.add('hidden');
         }
+
+        // Generate time options for select elements
+        function generateTimeOptions(startHour, endHour) {
+            let options = [];
+            for (let hour = startHour; hour <= endHour; hour++) {
+                const hour12 = hour <= 12 ? hour : hour - 12;
+                const ampm = hour < 12 ? 'AM' : 'PM';
+                const hour24 = hour.toString().padStart(2, '0');
+                
+                options.push(`<option value="${hour24}:00">${hour12}:00 ${ampm}</option>`);
+                options.push(`<option value="${hour24}:30">${hour12}:30 ${ampm}</option>`);
+            }
+            return options.join('');
+        }
+
+        // Load provider's schedule
+        async function loadProviderSchedule() {
+            try {
+                const response = await fetch(`/api/provider-schedule/${providerId}`);
+                if (response.ok) {
+                    const schedule = await response.json();
+                    
+                    // Set working hours
+                    document.getElementById('workingHoursStart').value = schedule.workingHours.start;
+                    document.getElementById('workingHoursEnd').value = schedule.workingHours.end;
+                    
+                    // Set break time
+                    document.getElementById('breakTimeStart').value = schedule.breakTime.start;
+                    document.getElementById('breakTimeEnd').value = schedule.breakTime.end;
+                }
+            } catch (error) {
+                console.error('Error loading provider schedule:', error);
+            }
+        }
+
+        // Handle schedule form submission
+        document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const scheduleData = {
+                providerId,
+                workingHours: {
+                    start: document.getElementById('workingHoursStart').value,
+                    end: document.getElementById('workingHoursEnd').value
+                },
+                breakTime: {
+                    start: document.getElementById('breakTimeStart').value,
+                    end: document.getElementById('breakTimeEnd').value
+                }
+            };
+
+            try {
+                const response = await fetch('/api/provider-schedule', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(scheduleData)
+                });
+
+                if (response.ok) {
+                    alert('Schedule updated successfully');
+                } else {
+                    throw new Error('Failed to update schedule');
+                }
+            } catch (error) {
+                console.error('Error updating schedule:', error);
+                alert('Failed to update schedule');
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProviderSchedule();
+        });
     </script>
 </body>
 </html> 

@@ -7,6 +7,8 @@ const Appointment = require('./models/Appointment');
 const MedicalRecord = require('./models/MedicalRecord');
 const ProviderProfile = require('./models/ProviderProfile');
 const PatientProfile = require('./models/PatientProfile');
+const Notification = require('./models/Notification');
+const ProviderSchedule = require('./models/ProviderSchedule');
 const app = express();
 
 // Define PORT first
@@ -125,10 +127,30 @@ app.post('/api/appointments', async (req, res) => {
     try {
         const { patientId, doctorId, dateTime, type } = req.body;
 
+        // Get provider's schedule
+        const schedule = await ProviderSchedule.findOne({ providerId: doctorId });
+        if (!schedule) {
+            return res.status(400).json({ message: 'Provider schedule not found' });
+        }
+
+        // Convert appointment time to HH:mm format for comparison
+        const appointmentTime = new Date(dateTime);
+        const timeString = appointmentTime.getHours().toString().padStart(2, '0') + ':' + 
+                          appointmentTime.getMinutes().toString().padStart(2, '0');
+
+        // Check if appointment is within working hours
+        if (timeString < schedule.workingHours.start || timeString >= schedule.workingHours.end) {
+            return res.status(400).json({ message: 'Appointment time is outside working hours' });
+        }
+
+        // Check if appointment is during break time
+        if (timeString >= schedule.breakTime.start && timeString < schedule.breakTime.end) {
+            return res.status(400).json({ message: 'Appointment time is during break time' });
+        }
+
         // Check for existing appointment at the same time
-        const appointmentDate = new Date(dateTime);
-        const startTime = new Date(appointmentDate);
-        const endTime = new Date(appointmentDate);
+        const startTime = new Date(appointmentTime);
+        const endTime = new Date(appointmentTime);
         endTime.setHours(endTime.getHours() + 1); // Assuming 1-hour appointments
 
         const existingAppointment = await Appointment.findOne({
@@ -137,21 +159,38 @@ app.post('/api/appointments', async (req, res) => {
                 $gte: startTime,
                 $lt: endTime
             },
-            status: 'scheduled'
+            status: { $in: ['scheduled', 'accepted'] }
         });
 
         if (existingAppointment) {
             return res.status(400).json({ message: 'This time slot is already booked' });
         }
 
+        // Get patient details for notification
+        const patient = await User.findById(patientId).select('username');
+        if (!patient) {
+            return res.status(400).json({ message: 'Patient not found' });
+        }
+
         const appointment = new Appointment({
             patientId,
             doctorId,
-            dateTime: appointmentDate,
+            dateTime: appointmentTime,
             type
         });
 
         await appointment.save();
+
+        // Create notification for the provider
+        const notification = new Notification({
+            userId: doctorId,
+            type: 'new_appointment',
+            message: `New appointment booked by ${patient.username} for ${type} on ${appointmentTime.toLocaleDateString()} at ${appointmentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+            appointmentId: appointment._id
+        });
+
+        await notification.save();
+
         res.status(201).json({ message: 'Appointment scheduled successfully' });
     } catch (error) {
         console.error('Error creating appointment:', error);
@@ -193,14 +232,40 @@ app.get('/api/appointments/:patientId', async (req, res) => {
 // Cancel appointment
 app.delete('/api/appointments/:appointmentId', async (req, res) => {
     try {
-        const appointment = await Appointment.findByIdAndUpdate(
-            req.params.appointmentId,
-            { status: 'cancelled' },
-            { new: true }
-        );
+        const appointment = await Appointment.findById(req.params.appointmentId)
+            .populate('patientId', 'username')
+            .populate('doctorId', 'username');
 
         if (!appointment) {
             return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        // Update appointment status
+        appointment.status = 'cancelled';
+        await appointment.save();
+
+        // Get the user who initiated the cancellation from the request headers or query
+        const cancelledBy = req.query.cancelledBy || req.headers['x-cancelled-by'];
+
+        // Create appropriate notification based on who cancelled
+        if (cancelledBy === 'provider') {
+            // If provider cancelled, notify the patient
+            const notification = new Notification({
+                userId: appointment.patientId._id,
+                type: 'appointment_cancelled',
+                message: `Your appointment with Dr. ${appointment.doctorId.username} has been cancelled. Please book again at another time.`,
+                appointmentId: appointment._id
+            });
+            await notification.save();
+        } else if (cancelledBy === 'patient') {
+            // If patient cancelled, notify the provider
+            const notification = new Notification({
+                userId: appointment.doctorId._id,
+                type: 'appointment_cancelled',
+                message: `Patient ${appointment.patientId.username} has cancelled their appointment scheduled for ${new Date(appointment.dateTime).toLocaleString()}.`,
+                appointmentId: appointment._id
+            });
+            await notification.save();
         }
 
         res.json({ message: 'Appointment cancelled successfully' });
@@ -225,7 +290,7 @@ app.get('/api/appointments/provider/:providerId', async (req, res) => {
         const appointments = await Appointment.find({ 
             doctorId: providerId,
             dateTime: { $gte: startDate, $lte: endDate },
-            status: 'scheduled'
+            status: { $in: ['scheduled', 'accepted'] }
         })
         .populate('patientId', 'username') // Get patient details
         .sort({ dateTime: 1 });
@@ -254,6 +319,7 @@ app.post('/api/medical-records', async (req, res) => {
     try {
         const { patientId, doctorId, recordType, diagnosis, prescription, notes } = req.body;
 
+        // Create the medical record
         const record = new MedicalRecord({
             patientId,
             doctorId,
@@ -264,7 +330,35 @@ app.post('/api/medical-records', async (req, res) => {
         });
 
         await record.save();
-        res.status(201).json({ message: 'Medical record created successfully' });
+
+        // Find and update the corresponding appointment
+        const appointment = await Appointment.findOne({
+            patientId,
+            doctorId,
+            status: 'accepted',
+            type: recordType
+        }).populate('doctorId', 'username');
+
+        if (appointment) {
+            // Mark appointment as completed
+            appointment.status = 'completed';
+            await appointment.save();
+
+            // Create notification for the patient
+            const notification = new Notification({
+                userId: patientId,
+                type: 'appointment_completed',
+                message: `Your appointment with Dr. ${appointment.doctorId.username} has been completed and a medical record has been created.`,
+                appointmentId: appointment._id
+            });
+
+            await notification.save();
+        }
+
+        res.status(201).json({ 
+            message: 'Medical record created successfully',
+            appointmentUpdated: !!appointment
+        });
     } catch (error) {
         console.error('Error creating medical record:', error);
         res.status(500).json({ message: 'Error creating medical record' });
@@ -341,7 +435,19 @@ app.get('/api/patients', async (req, res) => {
 app.get('/api/patients/search', async (req, res) => {
     try {
         const { query } = req.query;
-        let searchCriteria = { role: 'patient' };
+        const providerId = req.query.providerId; // Get the provider ID from query params
+
+        // Get all appointments for this provider that are either scheduled or accepted
+        const appointments = await Appointment.find({ 
+            doctorId: providerId,
+            status: { $in: ['scheduled', 'accepted'] }
+        }).distinct('patientId'); // Get unique patient IDs
+
+        // Build search criteria
+        let searchCriteria = {
+            role: 'patient',
+            _id: { $in: appointments } // Only include patients who have appointments
+        };
         
         if (query) {
             searchCriteria.username = { $regex: query, $options: 'i' };
@@ -350,6 +456,7 @@ app.get('/api/patients/search', async (req, res) => {
         const patients = await User.find(searchCriteria)
             .select('username email _id')
             .sort({ username: 1 });
+
         res.json(patients);
     } catch (error) {
         console.error('Error searching patients:', error);
@@ -663,6 +770,205 @@ app.get('/api/medical-records/patient/:patientId', async (req, res) => {
     } catch (error) {
         console.error('Error fetching patient medical records:', error);
         res.status(500).json({ message: 'Error fetching medical records' });
+    }
+});
+
+// Get provider's patients with their appointment types
+app.get('/api/provider-patients/:providerId', async (req, res) => {
+    try {
+        const { providerId } = req.params;
+
+        // Get all scheduled and accepted appointments for this provider
+        const appointments = await Appointment.find({ 
+            doctorId: providerId,
+            status: { $in: ['scheduled', 'accepted'] }
+        }).populate('patientId', 'username email');
+
+        // Format the response to include patient details and appointment type
+        const patients = appointments.map(apt => ({
+            _id: apt.patientId._id,
+            username: apt.patientId.username,
+            email: apt.patientId.email,
+            appointmentType: apt.type,
+            status: apt.status
+        }));
+
+        // Remove duplicates (keep the latest appointment type for each patient)
+        const uniquePatients = Array.from(
+            patients.reduce((map, patient) => 
+                map.set(patient._id.toString(), patient),
+                new Map()
+            ).values()
+        );
+
+        res.json(uniquePatients);
+    } catch (error) {
+        console.error('Error fetching provider patients:', error);
+        res.status(500).json({ message: 'Error fetching patients' });
+    }
+});
+
+// Create notification
+app.post('/api/notifications', async (req, res) => {
+    try {
+        const { userId, type, message, appointmentId } = req.body;
+        
+        const notification = new Notification({
+            userId,
+            type,
+            message,
+            appointmentId
+        });
+
+        await notification.save();
+        res.status(201).json({ message: 'Notification created successfully' });
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        res.status(500).json({ message: 'Error creating notification' });
+    }
+});
+
+// Get user's notifications
+app.get('/api/notifications/:userId', async (req, res) => {
+    try {
+        const notifications = await Notification.find({ userId: req.params.userId })
+            .sort({ date: -1 })
+            .limit(50); // Limit to last 50 notifications
+        res.json(notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ message: 'Error fetching notifications' });
+    }
+});
+
+// Mark notification as read
+app.put('/api/notifications/:notificationId/read', async (req, res) => {
+    try {
+        // Instead of updating, find and delete the notification
+        const notification = await Notification.findByIdAndDelete(req.params.notificationId);
+
+        if (!notification) {
+            return res.status(404).json({ message: 'Notification not found' });
+        }
+
+        res.json({ message: 'Notification deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+        res.status(500).json({ message: 'Error deleting notification' });
+    }
+});
+
+// Update the appointment accept endpoint
+app.put('/api/appointments/:appointmentId/accept', async (req, res) => {
+    try {
+        // Find the appointment and populate patient and doctor details
+        const appointment = await Appointment.findById(req.params.appointmentId)
+            .populate('patientId', 'username')
+            .populate('doctorId', 'username');
+
+        if (!appointment) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        // Check if appointment is already accepted or cancelled
+        if (appointment.status === 'accepted') {
+            return res.status(400).json({ message: 'Appointment is already accepted' });
+        }
+        if (appointment.status === 'cancelled') {
+            return res.status(400).json({ message: 'Cannot accept a cancelled appointment' });
+        }
+
+        // Update appointment status
+        appointment.status = 'accepted';
+        await appointment.save();
+
+        // Create notification for the patient
+        const notification = new Notification({
+            userId: appointment.patientId._id,
+            type: 'appointment_accepted',
+            message: `Your appointment with Dr. ${appointment.doctorId.username} has been accepted.`,
+            appointmentId: appointment._id
+        });
+
+        await notification.save();
+
+        res.json({ 
+            message: 'Appointment accepted successfully',
+            appointment: {
+                _id: appointment._id,
+                patientName: appointment.patientId.username,
+                dateTime: appointment.dateTime,
+                type: appointment.type,
+                status: appointment.status
+            }
+        });
+    } catch (error) {
+        console.error('Error accepting appointment:', error);
+        res.status(500).json({ message: 'Error accepting appointment' });
+    }
+});
+
+// Get provider's schedule
+app.get('/api/provider-schedule/:providerId', async (req, res) => {
+    try {
+        let schedule = await ProviderSchedule.findOne({ providerId: req.params.providerId });
+        
+        if (!schedule) {
+            // Return default schedule if none exists
+            schedule = {
+                workingHours: {
+                    start: '09:00',
+                    end: '17:00'
+                },
+                breakTime: {
+                    start: '13:00',
+                    end: '14:00'
+                }
+            };
+        }
+        
+        res.json(schedule);
+    } catch (error) {
+        console.error('Error fetching provider schedule:', error);
+        res.status(500).json({ message: 'Error fetching schedule' });
+    }
+});
+
+// Update provider's schedule
+app.post('/api/provider-schedule', async (req, res) => {
+    try {
+        const { providerId, workingHours, breakTime } = req.body;
+
+        // Validate time format and ranges
+        const validateTime = (time) => {
+            const [hours] = time.split(':');
+            return hours >= 0 && hours < 24;
+        };
+
+        if (!validateTime(workingHours.start) || !validateTime(workingHours.end) ||
+            !validateTime(breakTime.start) || !validateTime(breakTime.end)) {
+            return res.status(400).json({ message: 'Invalid time format' });
+        }
+
+        // Find or create schedule
+        let schedule = await ProviderSchedule.findOne({ providerId });
+        
+        if (schedule) {
+            schedule.workingHours = workingHours;
+            schedule.breakTime = breakTime;
+        } else {
+            schedule = new ProviderSchedule({
+                providerId,
+                workingHours,
+                breakTime
+            });
+        }
+
+        await schedule.save();
+        res.json({ message: 'Schedule updated successfully' });
+    } catch (error) {
+        console.error('Error updating provider schedule:', error);
+        res.status(500).json({ message: 'Error updating schedule' });
     }
 });
 
