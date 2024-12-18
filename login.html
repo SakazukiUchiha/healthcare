@@ -6,7 +6,7 @@
     <title>Login - Healthcare Appointment System</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="bg-gray-100 flex items-center justify-center h-screen relative">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 class="text-2xl font-bold mb-6 text-center">Log In</h2>
         <form>
@@ -26,6 +26,16 @@
         </form>
         <p class="mt-4 text-center text-gray-600">Don't have an account? <a href="register.html" class="text-blue-600 hover:text-blue-800">Register here</a></p>
     </div>
+
+    <!-- Exit Icon -->
+    <div class="fixed bottom-4 right-4">
+        <button onclick="window.location.href='main.html'" class="bg-gray-200 hover:bg-gray-300 rounded-full p-3 transition-colors duration-200">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+        </button>
+    </div>
+
     <script>
     document.querySelector('form').addEventListener('submit', async (e) => {
         e.preventDefault();
