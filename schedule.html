@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule - Healthcare Provider Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="flex">
+        <!-- Side Navigation -->
+        <nav class="bg-green-800 text-white w-64 min-h-screen px-4 py-6">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold">Provider Portal</h2>
+            </div>
+            <ul class="space-y-3">
+                <li>
+                    <a href="Hdashboard.html" class="flex items-center space-x-2 p-2 hover:bg-green-700 rounded">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="schedule.html" class="flex items-center space-x-2 p-2 bg-green-700 rounded">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Schedule</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="patients-list.html" class="flex items-center space-x-2 p-2 hover:bg-green-700 rounded">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <span>Patients</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="provider-records.html" class="flex items-center space-x-2 p-2 hover:bg-green-700 rounded">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span>Medical Records</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="provider-profile.html" class="flex items-center space-x-2 p-2 hover:bg-green-700 rounded">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <span>Profile</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <nav class="bg-green-600 p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <h1 class="text-white text-2xl font-bold">Schedule</h1>
+                    <button onclick="location.href='login.html'" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
+                </div>
+            </nav>
+            <main class="container mx-auto mt-8 p-4">
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Today's Schedule</h2>
+                            <div class="flex space-x-2">
+                                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Previous Day</button>
+                                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Next Day</button>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-semibold">9:00 AM - John Doe</p>
+                                        <p class="text-gray-600">General Check-up</p>
+                                        <p class="text-gray-600">Patient ID: #12345</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="text-green-600 hover:text-green-800">View Details</button>
+                                        <button class="text-red-600 hover:text-red-800">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-semibold">10:30 AM - Jane Smith</p>
+                                        <p class="text-gray-600">Follow-up Consultation</p>
+                                        <p class="text-gray-600">Patient ID: #12346</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button class="text-green-600 hover:text-green-800">View Details</button>
+                                        <button class="text-red-600 hover:text-red-800">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h2 class="text-xl font-bold mb-4">Schedule Management</h2>
+                        <form class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Working Hours</label>
+                                    <div class="flex space-x-2">
+                                        <select class="w-full p-2 border rounded">
+                                            <option>9:00 AM</option>
+                                            <option>8:00 AM</option>
+                                            <option>10:00 AM</option>
+                                        </select>
+                                        <span class="flex items-center">to</span>
+                                        <select class="w-full p-2 border rounded">
+                                            <option>5:00 PM</option>
+                                            <option>4:00 PM</option>
+                                            <option>6:00 PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Break Time</label>
+                                    <div class="flex space-x-2">
+                                        <select class="w-full p-2 border rounded">
+                                            <option>1:00 PM</option>
+                                            <option>12:00 PM</option>
+                                            <option>2:00 PM</option>
+                                        </select>
+                                        <span class="flex items-center">to</span>
+                                        <select class="w-full p-2 border rounded">
+                                            <option>2:00 PM</option>
+                                            <option>1:00 PM</option>
+                                            <option>3:00 PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Update Schedule</button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html> 

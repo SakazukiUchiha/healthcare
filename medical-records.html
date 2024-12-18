@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Dashboard</title>
+    <title>Medical Records - Patient Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
@@ -15,7 +15,7 @@
             </div>
             <ul class="space-y-3">
                 <li>
-                    <a href="Pdashboard.html" class="flex items-center space-x-2 p-2 bg-blue-700 rounded">
+                    <a href="Pdashboard.html" class="flex items-center space-x-2 p-2 hover:bg-blue-700 rounded">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                         </svg>
@@ -31,7 +31,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="medical-records.html" class="flex items-center space-x-2 p-2 hover:bg-blue-700 rounded">
+                    <a href="medical-records.html" class="flex items-center space-x-2 p-2 bg-blue-700 rounded">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
@@ -53,23 +53,56 @@
         <div class="flex-1">
             <nav class="bg-blue-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
-                    <h1 class="text-white text-2xl font-bold">Patient Dashboard</h1>
+                    <h1 class="text-white text-2xl font-bold">Medical Records</h1>
                     <button onclick="location.href='login.html'" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6">
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold mb-4">Book Appointment</h2>
-                        <button onclick="location.href='appointments.html'" class="bg-blue-600 text-white px-4 py-2 rounded">Schedule New Appointment</button>
+                        <h2 class="text-xl font-bold mb-4">Recent Medical Records</h2>
+                        <div class="space-y-4">
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-semibold">General Check-up</p>
+                                        <p class="text-gray-600">Dr. John Smith</p>
+                                        <p class="text-gray-600">Date: March 1, 2024</p>
+                                    </div>
+                                    <button class="text-blue-600 hover:text-blue-800">View Details</button>
+                                </div>
+                            </div>
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-semibold">Blood Test Results</p>
+                                        <p class="text-gray-600">Lab: City Medical Lab</p>
+                                        <p class="text-gray-600">Date: February 15, 2024</p>
+                                    </div>
+                                    <button class="text-blue-600 hover:text-blue-800">View Details</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold mb-4">My Appointments</h2>
-                        <div class="text-gray-600">No appointments scheduled</div>
+                        <h2 class="text-xl font-bold mb-4">Prescriptions</h2>
+                        <div class="space-y-4">
+                            <div class="border-b pb-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-semibold">Amoxicillin 500mg</p>
+                                        <p class="text-gray-600">Dr. Sarah Johnson</p>
+                                        <p class="text-gray-600">Prescribed: March 5, 2024</p>
+                                        <p class="text-gray-600">Duration: 7 days</p>
+                                    </div>
+                                    <button class="text-blue-600 hover:text-blue-800">Download PDF</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 </body>
-</html>
+</html> 

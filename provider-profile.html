@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Healthcare Provider Dashboard</title>
+    <title>Profile - Healthcare Provider Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
@@ -15,7 +15,7 @@
             </div>
             <ul class="space-y-3">
                 <li>
-                    <a href="Hdashboard.html" class="flex items-center space-x-2 p-2 bg-green-700 rounded">
+                    <a href="Hdashboard.html" class="flex items-center space-x-2 p-2 hover:bg-green-700 rounded">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                         </svg>
@@ -47,7 +47,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="provider-profile.html" class="flex items-center space-x-2 p-2 hover:bg-green-700 rounded">
+                    <a href="provider-profile.html" class="flex items-center space-x-2 p-2 bg-green-700 rounded">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
@@ -61,24 +61,74 @@
         <div class="flex-1">
             <nav class="bg-green-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
-                    <h1 class="text-white text-2xl font-bold">Healthcare Provider Dashboard</h1>
+                    <h1 class="text-white text-2xl font-bold">Profile</h1>
                     <button onclick="location.href='login.html'" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6">
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold mb-4">Today's Appointments</h2>
-                        <div class="text-gray-600">No appointments scheduled</div>
-                        <button onclick="location.href='schedule.html'" class="mt-4 bg-green-600 text-white px-4 py-2 rounded">View Schedule</button>
+                        <h2 class="text-xl font-bold mb-4">Professional Information</h2>
+                        <form class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-2">First Name</label>
+                                    <input type="text" value="Dr. John" class="w-full p-2 border rounded">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Last Name</label>
+                                    <input type="text" value="Smith" class="w-full p-2 border rounded">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Specialization</label>
+                                    <input type="text" value="General Physician" class="w-full p-2 border rounded">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">License Number</label>
+                                    <input type="text" value="MD123456" class="w-full p-2 border rounded">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Email</label>
+                                <input type="email" value="dr.smith@example.com" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Phone</label>
+                                <input type="tel" value="(555) 123-4567" class="w-full p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Office Address</label>
+                                <textarea class="w-full p-2 border rounded" rows="3">123 Medical Center Dr.
+Suite 100
+City, State 12345</textarea>
+                            </div>
+                            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save Changes</button>
+                        </form>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold mb-4">Patient Records</h2>
-                        <button onclick="location.href='provider-records.html'" class="bg-green-600 text-white px-4 py-2 rounded">View Records</button>
+                        <h2 class="text-xl font-bold mb-4">Credentials</h2>
+                        <form class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Medical School</label>
+                                    <input type="text" value="University Medical School" class="w-full p-2 border rounded">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Graduation Year</label>
+                                    <input type="text" value="2010" class="w-full p-2 border rounded">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Board Certifications</label>
+                                <textarea class="w-full p-2 border rounded" rows="3">American Board of Internal Medicine
+American Board of Family Medicine</textarea>
+                            </div>
+                            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save Changes</button>
+                        </form>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 </body>
-</html>
+</html> 
