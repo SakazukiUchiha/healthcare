@@ -71,50 +71,52 @@
                         <div class="bg-white p-6 rounded-lg shadow">
                             <h2 class="text-xl font-bold mb-4">Professional Information</h2>
                             <div class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-gray-700 mb-2">First Name</label>
-                                        <input type="text" id="firstName" class="w-full p-2 border rounded" required>
+                                        <input type="text" id="firstName" class="w-full p-2 border rounded" 
+                                            placeholder="Enter your first name" required>
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 mb-2">Last Name</label>
-                                        <input type="text" id="lastName" class="w-full p-2 border rounded" required>
+                                        <input type="text" id="lastName" class="w-full p-2 border rounded" 
+                                            placeholder="Enter your last name" required>
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 mb-2">Specialization</label>
-                                        <input type="text" id="specialization" class="w-full p-2 border rounded" required>
+                                        <input type="text" id="specialization" class="w-full p-2 border rounded" 
+                                            placeholder="e.g., Cardiology, Pediatrics, Family Medicine" required>
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 mb-2">License Number</label>
-                                        <input type="text" id="licenseNumber" class="w-full p-2 border rounded" required>
+                                        <input type="text" id="licenseNumber" class="w-full p-2 border rounded" 
+                                            placeholder="Enter your medical license number" required>
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 mb-2">Phone</label>
-                                    <input type="tel" id="phone" class="w-full p-2 border rounded" required>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 mb-2">Office Address</label>
-                                    <textarea id="officeAddress" class="w-full p-2 border rounded" rows="3" required></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h2 class="text-xl font-bold mb-4">Credentials</h2>
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Phone</label>
+                                        <input type="tel" id="phone" class="w-full p-2 border rounded" 
+                                            placeholder="e.g., (123) 456-7890" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 mb-2">Office Address</label>
+                                        <input type="text" id="officeAddress" class="w-full p-2 border rounded" 
+                                            placeholder="Enter your office/clinic address" required>
+                                    </div>
                                     <div>
                                         <label class="block text-gray-700 mb-2">Medical School</label>
-                                        <input type="text" id="medicalSchool" class="w-full p-2 border rounded" required>
+                                        <input type="text" id="medicalSchool" class="w-full p-2 border rounded" 
+                                            placeholder="Enter your medical school name" required>
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 mb-2">Graduation Year</label>
-                                        <input type="text" id="graduationYear" class="w-full p-2 border rounded" required>
+                                        <input type="number" id="graduationYear" class="w-full p-2 border rounded" 
+                                            placeholder="e.g., 2015" min="1950" max="2024" required>
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="block text-gray-700 mb-2">Board Certifications</label>
-                                    <textarea id="boardCertifications" class="w-full p-2 border rounded" rows="3" required></textarea>
+                                    <div class="col-span-2">
+                                        <label class="block text-gray-700 mb-2">Board Certifications</label>
+                                        <textarea id="boardCertifications" class="w-full p-2 border rounded" rows="3" 
+                                            placeholder="List your board certifications, separated by commas" required></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>

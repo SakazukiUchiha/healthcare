@@ -62,14 +62,16 @@
                     <!-- Personal Information -->
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">Personal Information</h2>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-gray-700 mb-2">First Name</label>
-                                <input type="text" id="firstName" class="w-full p-2 border rounded" required>
+                                <input type="text" id="firstName" class="w-full p-2 border rounded" 
+                                    placeholder="Enter your first name" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Last Name</label>
-                                <input type="text" id="lastName" class="w-full p-2 border rounded" required>
+                                <input type="text" id="lastName" class="w-full p-2 border rounded" 
+                                    placeholder="Enter your last name" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Date of Birth</label>
@@ -86,11 +88,13 @@
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Phone</label>
-                                <input type="tel" id="phone" class="w-full p-2 border rounded" required>
+                                <input type="tel" id="phone" class="w-full p-2 border rounded" 
+                                    placeholder="e.g., (123) 456-7890" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Address</label>
-                                <input type="text" id="address" class="w-full p-2 border rounded" required>
+                                <input type="text" id="address" class="w-full p-2 border rounded" 
+                                    placeholder="Enter your home address" required>
                             </div>
                         </div>
                     </div>
@@ -98,18 +102,21 @@
                     <!-- Emergency Contact -->
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">Emergency Contact</h2>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-gray-700 mb-2">Name</label>
-                                <input type="text" id="emergencyName" class="w-full p-2 border rounded" required>
+                                <input type="text" id="emergencyName" class="w-full p-2 border rounded" 
+                                    placeholder="Emergency contact's full name" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Relationship</label>
-                                <input type="text" id="emergencyRelationship" class="w-full p-2 border rounded" required>
+                                <input type="text" id="emergencyRelationship" class="w-full p-2 border rounded" 
+                                    placeholder="e.g., Spouse, Parent, Sibling" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Phone</label>
-                                <input type="tel" id="emergencyPhone" class="w-full p-2 border rounded" required>
+                                <input type="tel" id="emergencyPhone" class="w-full p-2 border rounded" 
+                                    placeholder="Emergency contact's phone" required>
                             </div>
                         </div>
                     </div>
@@ -117,22 +124,26 @@
                     <!-- Medical History -->
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">Medical History</h2>
-                        <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-gray-700 mb-2">Allergies</label>
-                                <textarea id="allergies" class="w-full p-2 border rounded" rows="2"></textarea>
+                                <textarea id="allergies" class="w-full p-2 border rounded" rows="3" 
+                                    placeholder="List any allergies, if none write 'None'"></textarea>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Chronic Conditions</label>
-                                <textarea id="chronicConditions" class="w-full p-2 border rounded" rows="2"></textarea>
+                                <textarea id="chronicConditions" class="w-full p-2 border rounded" rows="3" 
+                                    placeholder="List any chronic conditions, if none write 'None'"></textarea>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Current Medications</label>
-                                <textarea id="currentMedications" class="w-full p-2 border rounded" rows="2"></textarea>
+                                <textarea id="currentMedications" class="w-full p-2 border rounded" rows="3" 
+                                    placeholder="List current medications with dosage, if none write 'None'"></textarea>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Past Surgeries</label>
-                                <textarea id="pastSurgeries" class="w-full p-2 border rounded" rows="2"></textarea>
+                                <textarea id="pastSurgeries" class="w-full p-2 border rounded" rows="3" 
+                                    placeholder="List past surgeries with dates, if none write 'None'"></textarea>
                             </div>
                         </div>
                     </div>
@@ -140,18 +151,21 @@
                     <!-- Insurance Information -->
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">Insurance Information</h2>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-gray-700 mb-2">Insurance Provider</label>
-                                <input type="text" id="insuranceProvider" class="w-full p-2 border rounded" required>
+                                <input type="text" id="insuranceProvider" class="w-full p-2 border rounded" 
+                                    placeholder="Enter insurance company name" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Policy Number</label>
-                                <input type="text" id="policyNumber" class="w-full p-2 border rounded" required>
+                                <input type="text" id="policyNumber" class="w-full p-2 border rounded" 
+                                    placeholder="Enter your policy number" required>
                             </div>
                             <div>
                                 <label class="block text-gray-700 mb-2">Group Number</label>
-                                <input type="text" id="groupNumber" class="w-full p-2 border rounded" required>
+                                <input type="text" id="groupNumber" class="w-full p-2 border rounded" 
+                                    placeholder="Enter your group number" required>
                             </div>
                         </div>
                     </div>
