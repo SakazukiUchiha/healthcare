@@ -62,7 +62,7 @@
             <nav class="bg-green-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
                     <h1 class="text-white text-2xl font-bold">Schedule</h1>
-                    <button onclick="location.href='login.html'" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
+                    <button onclick="logout()" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
@@ -71,37 +71,12 @@
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold">Today's Schedule</h2>
                             <div class="flex space-x-2">
-                                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Previous Day</button>
-                                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Next Day</button>
+                                <button onclick="changeDate(-1)" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Previous Day</button>
+                                <button onclick="changeDate(1)" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Next Day</button>
                             </div>
                         </div>
-                        <div class="space-y-4">
-                            <div class="border-b pb-4">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="font-semibold">9:00 AM - John Doe</p>
-                                        <p class="text-gray-600">General Check-up</p>
-                                        <p class="text-gray-600">Patient ID: #12345</p>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <button class="text-green-600 hover:text-green-800">View Details</button>
-                                        <button class="text-red-600 hover:text-red-800">Cancel</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="border-b pb-4">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="font-semibold">10:30 AM - Jane Smith</p>
-                                        <p class="text-gray-600">Follow-up Consultation</p>
-                                        <p class="text-gray-600">Patient ID: #12346</p>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <button class="text-green-600 hover:text-green-800">View Details</button>
-                                        <button class="text-red-600 hover:text-red-800">Cancel</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div id="appointments-container" class="space-y-4">
+                            <!-- Appointments will be dynamically inserted here -->
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
@@ -148,5 +123,109 @@
             </main>
         </div>
     </div>
+
+    <script>
+        let currentDate = new Date();
+        const providerId = localStorage.getItem('userId');
+
+        // Add logout function
+        function logout() {
+            // Clear all items from localStorage
+            localStorage.clear();
+            // Redirect to login page
+            window.location.href = '/login.html';
+        }
+
+        // Check if user is logged in and is a healthcare provider
+        window.addEventListener('load', () => {
+            const userRole = localStorage.getItem('userRole');
+            if (!providerId || userRole !== 'healthcare-provider') {
+                window.location.href = '/login.html';
+                return;
+            }
+            fetchAppointments();
+        });
+
+        async function fetchAppointments() {
+            try {
+                const formattedDate = currentDate.toISOString().split('T')[0];
+                const response = await fetch(`/api/appointments/provider/${providerId}?date=${formattedDate}`);
+                const appointments = await response.json();
+                
+                if (response.ok) {
+                    displayAppointments(appointments);
+                } else {
+                    console.error('Failed to fetch appointments:', appointments.message);
+                }
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+            }
+        }
+
+        function displayAppointments(appointments) {
+            const container = document.getElementById('appointments-container');
+            container.innerHTML = '';
+
+            if (appointments.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No appointments scheduled for this day.</p>';
+                return;
+            }
+
+            appointments.forEach(appointment => {
+                const appointmentTime = new Date(appointment.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const appointmentDiv = document.createElement('div');
+                appointmentDiv.className = 'border-b pb-4';
+                appointmentDiv.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold">${appointmentTime} - ${appointment.patientName}</p>
+                            <p class="text-gray-600">${appointment.reason}</p>
+                            <p class="text-gray-600">Patient ID: #${appointment.patientId}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="viewAppointmentDetails('${appointment._id}')" 
+                                    class="text-green-600 hover:text-green-800">View Details</button>
+                            <button onclick="cancelAppointment('${appointment._id}')" 
+                                    class="text-red-600 hover:text-red-800">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(appointmentDiv);
+            });
+        }
+
+        function changeDate(days) {
+            currentDate.setDate(currentDate.getDate() + days);
+            fetchAppointments();
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/appointments/${appointmentId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Appointment cancelled successfully');
+                    fetchAppointments();
+                } else {
+                    const data = await response.json();
+                    alert(`Failed to cancel appointment: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Failed to cancel appointment');
+            }
+        }
+
+        function viewAppointmentDetails(appointmentId) {
+            // This function can be implemented later to show more details or redirect to a detailed view
+            alert('Viewing appointment details - Feature coming soon');
+        }
+    </script>
 </body>
 </html> 

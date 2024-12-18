@@ -46,6 +46,11 @@
 
             const data = await response.json();
             if (response.ok) {
+                // Store user data in localStorage
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('userRole', data.role);
+
                 const roleMessage = data.role === 'patient' ? 
                     'Welcome Patient! Redirecting to Patient Dashboard...' : 
                     'Welcome Healthcare Provider! Redirecting to Provider Dashboard...';
@@ -56,7 +61,19 @@
                 alert(data.message);
             }
         } catch (error) {
+            console.error('Login error:', error);
             alert('Login failed');
+        }
+    });
+
+    // Check if user is already logged in
+    window.addEventListener('load', () => {
+        const userId = localStorage.getItem('userId');
+        const userRole = localStorage.getItem('userRole');
+        
+        if (userId && userRole) {
+            const redirect = userRole === 'patient' ? '/Pdashboard.html' : '/Hdashboard.html';
+            window.location.href = redirect;
         }
     });
     </script>

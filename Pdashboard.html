@@ -53,8 +53,8 @@
         <div class="flex-1">
             <nav class="bg-blue-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
-                    <h1 class="text-white text-2xl font-bold">Patient Dashboard</h1>
-                    <button onclick="location.href='login.html'" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
+                    <h1 class="text-white text-2xl font-bold">Dashboard</h1>
+                    <button onclick="logout()" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
@@ -65,11 +65,88 @@
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">My Appointments</h2>
-                        <div class="text-gray-600">No appointments scheduled</div>
+                        <div id="appointmentsList" class="space-y-4">
+                            <div class="text-gray-600">Loading appointments...</div>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+
+    <script>
+        // Get user ID from localStorage (set during login)
+        const userId = localStorage.getItem('userId');
+        
+        // Fetch and display appointments
+        async function fetchAppointments() {
+            try {
+                const response = await fetch(`/api/appointments/${userId}`);
+                const appointments = await response.json();
+                
+                const appointmentsList = document.getElementById('appointmentsList');
+                
+                if (appointments.length === 0) {
+                    appointmentsList.innerHTML = '<div class="text-gray-600">No appointments scheduled</div>';
+                    return;
+                }
+
+                appointmentsList.innerHTML = appointments.map(appointment => `
+                    <div class="border-b pb-4">
+                        <p class="font-semibold">Dr. ${appointment.doctorId.username}</p>
+                        <p class="text-gray-600">Date: ${new Date(appointment.date).toLocaleDateString()}</p>
+                        <p class="text-gray-600">Time: ${appointment.time}</p>
+                        <button onclick="cancelAppointment('${appointment._id}')" 
+                                class="mt-2 text-red-600 hover:text-red-800">
+                            Cancel Appointment
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+                document.getElementById('appointmentsList').innerHTML = 
+                    '<div class="text-red-600">Error loading appointments</div>';
+            }
+        }
+
+        // Cancel appointment
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/appointments/${appointmentId}/cancel`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    // Refresh appointments list
+                    fetchAppointments();
+                } else {
+                    alert('Failed to cancel appointment');
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Error cancelling appointment');
+            }
+        }
+
+        // Check if user is logged in
+        if (!userId) {
+            location.href = 'login.html';
+        } else {
+            // Fetch appointments when page loads
+            fetchAppointments();
+        }
+
+        // Add logout function
+        function logout() {
+            // Clear all items from localStorage
+            localStorage.clear();
+            // Redirect to login page
+            window.location.href = '/login.html';
+        }
+    </script>
 </body>
 </html>
