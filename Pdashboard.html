@@ -65,7 +65,7 @@
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">My Appointments</h2>
-                        <div id="appointmentsList" class="space-y-4">
+                        <div id="appointmentsContainer" class="space-y-4">
                             <div class="text-gray-600">Loading appointments...</div>
                         </div>
                     </div>
@@ -84,28 +84,45 @@
                 const response = await fetch(`/api/appointments/${userId}`);
                 const appointments = await response.json();
                 
-                const appointmentsList = document.getElementById('appointmentsList');
-                
+                const appointmentsContainer = document.getElementById('appointmentsContainer');
+                appointmentsContainer.innerHTML = '';
+
                 if (appointments.length === 0) {
-                    appointmentsList.innerHTML = '<div class="text-gray-600">No appointments scheduled</div>';
+                    appointmentsContainer.innerHTML = '<p class="text-gray-500">No upcoming appointments</p>';
                     return;
                 }
 
-                appointmentsList.innerHTML = appointments.map(appointment => `
-                    <div class="border-b pb-4">
-                        <p class="font-semibold">Dr. ${appointment.doctorId.username}</p>
-                        <p class="text-gray-600">Date: ${new Date(appointment.date).toLocaleDateString()}</p>
-                        <p class="text-gray-600">Time: ${appointment.time}</p>
-                        <button onclick="cancelAppointment('${appointment._id}')" 
-                                class="mt-2 text-red-600 hover:text-red-800">
-                            Cancel Appointment
-                        </button>
-                    </div>
-                `).join('');
+                appointments.forEach(appointment => {
+                    const appointmentDate = new Date(appointment.dateTime);
+                    const formattedDate = appointmentDate.toLocaleDateString('en-US', { 
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    const formattedTime = appointmentDate.toLocaleTimeString('en-US', { 
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    const appointmentCard = document.createElement('div');
+                    appointmentCard.className = 'bg-white p-4 rounded-lg shadow mb-4';
+                    appointmentCard.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold">Dr. ${appointment.doctorId.username}</h3>
+                                <p class="text-gray-600">Date: ${formattedDate}</p>
+                                <p class="text-gray-600">Time: ${formattedTime}</p>
+                                <p class="text-gray-600">Type: ${appointment.type}</p>
+                            </div>
+                            <button onclick="cancelAppointment('${appointment._id}')"
+                                    class="text-red-600 hover:text-red-800">Cancel</button>
+                        </div>
+                    `;
+                    appointmentsContainer.appendChild(appointmentCard);
+                });
             } catch (error) {
                 console.error('Error fetching appointments:', error);
-                document.getElementById('appointmentsList').innerHTML = 
-                    '<div class="text-red-600">Error loading appointments</div>';
             }
         }
 
@@ -142,10 +159,8 @@
 
         // Add logout function
         function logout() {
-            // Clear all items from localStorage
             localStorage.clear();
-            // Redirect to login page
-            window.location.href = '/login.html';
+            window.location.href = 'login.html';
         }
     </script>
 </body>

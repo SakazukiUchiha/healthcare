@@ -62,7 +62,7 @@
             <nav class="bg-green-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
                     <h1 class="text-white text-2xl font-bold">Patients List</h1>
-                    <button onclick="location.href='login.html'" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
+                    <button onclick="logout()" class="bg-white text-green-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
@@ -70,10 +70,21 @@
                     <div class="bg-white p-6 rounded-lg shadow">
                         <div class="flex justify-between items-center mb-4">
                             <div class="flex space-x-2">
-                                <input type="text" placeholder="Search patients..." class="p-2 border rounded">
-                                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Search</button>
+                                <div class="relative">
+                                    <input type="text" 
+                                           id="searchInput" 
+                                           placeholder="Search patients..." 
+                                           class="p-2 border rounded w-64"
+                                           oninput="handleSearchInput(this.value)">
+                                    <div id="searchSpinner" class="hidden absolute right-2 top-2">
+                                        <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
-                            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add New Patient</button>
+                            <button onclick="openNewPatientModal()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add New Patient</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full">
@@ -81,50 +92,351 @@
                                     <tr class="bg-gray-50">
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient ID</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Visit</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">#12345</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">John Doe</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">45</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">March 1, 2024</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex space-x-2">
-                                                <button class="text-green-600 hover:text-green-800">View Records</button>
-                                                <button class="text-blue-600 hover:text-blue-800">Schedule</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">#12346</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">Jane Smith</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">32</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">February 28, 2024</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex space-x-2">
-                                                <button class="text-green-600 hover:text-green-800">View Records</button>
-                                                <button class="text-blue-600 hover:text-blue-800">Schedule</button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                <tbody id="patientsTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Patients will be dynamically inserted here -->
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <div class="text-gray-600">Showing 1-2 of 2 patients</div>
-                            <div class="flex space-x-2">
-                                <button class="px-3 py-1 border rounded text-gray-600 hover:bg-gray-100">Previous</button>
-                                <button class="px-3 py-1 border rounded text-gray-600 hover:bg-gray-100">Next</button>
-                            </div>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+
+    <!-- New Patient Modal -->
+    <div id="newPatientModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-bold mb-4">Add New Patient</h3>
+                <form id="newPatientForm" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="patientName" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Email</label>
+                        <input type="email" id="patientEmail" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Password</label>
+                        <input type="password" id="patientPassword" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="closeNewPatientModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Patient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Details Modal -->
+    <div id="patientDetailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-4/5 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold" id="modalPatientName">Patient Details</h3>
+                <button onclick="closePatientModal()" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Personal Information -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Personal Information</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-600">Date of Birth</p>
+                            <p id="modalDOB" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Gender</p>
+                            <p id="modalGender" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Phone</p>
+                            <p id="modalPhone" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Address</p>
+                            <p id="modalAddress" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Emergency Contact</h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-gray-600">Name</p>
+                            <p id="modalEmergencyName" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Relationship</p>
+                            <p id="modalEmergencyRelationship" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Phone</p>
+                            <p id="modalEmergencyPhone" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical History -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Medical History</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-600">Allergies</p>
+                            <p id="modalAllergies" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Chronic Conditions</p>
+                            <p id="modalChronicConditions" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Current Medications</p>
+                            <p id="modalMedications" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Past Surgeries</p>
+                            <p id="modalSurgeries" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insurance Information -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Insurance Information</h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-gray-600">Provider</p>
+                            <p id="modalInsuranceProvider" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Policy Number</p>
+                            <p id="modalPolicyNumber" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Group Number</p>
+                            <p id="modalGroupNumber" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const providerId = localStorage.getItem('userId');
+        let searchTimeout;
+
+        // Add logout function
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        // Check if user is logged in and is a healthcare provider
+        window.addEventListener('load', () => {
+            const userRole = localStorage.getItem('userRole');
+            if (!localStorage.getItem('userId') || userRole !== 'healthcare-provider') {
+                window.location.href = '/login.html';
+                return;
+            }
+            searchPatients(); // Initial load of patients
+        });
+
+        // Handle search input with debounce
+        function handleSearchInput(value) {
+            // Show spinner
+            document.getElementById('searchSpinner').classList.remove('hidden');
+            
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout
+            searchTimeout = setTimeout(() => {
+                searchPatients(value);
+            }, 300); // Wait 300ms after user stops typing
+        }
+
+        // Search patients
+        async function searchPatients(query = '') {
+            try {
+                const response = await fetch(`/api/patients/search?query=${encodeURIComponent(query)}`);
+                const patients = await response.json();
+                
+                const tbody = document.getElementById('patientsTableBody');
+                if (patients.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                No patients found${query ? ` for "${query}"` : ''}
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = patients.map(patient => `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">${patient._id}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="font-medium text-gray-900">${patient.username}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">${patient.email}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    <button onclick="viewPatientRecords('${patient._id}')" class="text-green-600 hover:text-green-800">View Records</button>
+                                    <button onclick="scheduleAppointment('${patient._id}')" class="text-blue-600 hover:text-blue-800">Schedule</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error searching patients:', error);
+                document.getElementById('patientsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-red-500">
+                            Error searching patients. Please try again.
+                        </td>
+                    </tr>
+                `;
+            } finally {
+                // Hide spinner
+                document.getElementById('searchSpinner').classList.add('hidden');
+            }
+        }
+
+        // Modal functions
+        function openNewPatientModal() {
+            document.getElementById('newPatientModal').classList.remove('hidden');
+        }
+
+        function closeNewPatientModal() {
+            document.getElementById('newPatientModal').classList.add('hidden');
+            document.getElementById('newPatientForm').reset();
+        }
+
+        // Handle new patient form submission
+        document.getElementById('newPatientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const patientData = {
+                username: document.getElementById('patientName').value,
+                email: document.getElementById('patientEmail').value,
+                password: document.getElementById('patientPassword').value
+            };
+
+            try {
+                const response = await fetch('/api/patients', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(patientData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeNewPatientModal();
+                    searchPatients(); // Refresh the patients list
+                    alert('Patient added successfully');
+                } else {
+                    alert(data.message || 'Failed to add patient');
+                }
+            } catch (error) {
+                console.error('Error adding patient:', error);
+                alert('Error adding patient');
+            }
+        });
+
+        function viewPatientRecords(patientId) {
+            // Store the patient ID in localStorage for use in the records page
+            localStorage.setItem('selectedPatientId', patientId);
+            window.location.href = 'provider-records.html';
+        }
+
+        function scheduleAppointment(patientId) {
+            // Store the patient ID in localStorage for use in the schedule page
+            localStorage.setItem('selectedPatientId', patientId);
+            window.location.href = 'schedule.html';
+        }
+
+        // Function to view patient details
+        async function viewPatientDetails(patientId) {
+            try {
+                const response = await fetch(`/api/patient-profile/${patientId}`);
+                const profile = await response.json();
+
+                if (response.ok) {
+                    // Update modal with patient information
+                    document.getElementById('modalPatientName').textContent = `${profile.firstName} ${profile.lastName}`;
+                    document.getElementById('modalDOB').textContent = profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-';
+                    document.getElementById('modalGender').textContent = profile.gender || '-';
+                    document.getElementById('modalPhone').textContent = profile.phone || '-';
+                    document.getElementById('modalAddress').textContent = profile.address || '-';
+
+                    // Emergency Contact
+                    document.getElementById('modalEmergencyName').textContent = profile.emergencyContact?.name || '-';
+                    document.getElementById('modalEmergencyRelationship').textContent = profile.emergencyContact?.relationship || '-';
+                    document.getElementById('modalEmergencyPhone').textContent = profile.emergencyContact?.phone || '-';
+
+                    // Medical History
+                    document.getElementById('modalAllergies').textContent = profile.medicalHistory?.allergies || '-';
+                    document.getElementById('modalChronicConditions').textContent = profile.medicalHistory?.chronicConditions || '-';
+                    document.getElementById('modalMedications').textContent = profile.medicalHistory?.currentMedications || '-';
+                    document.getElementById('modalSurgeries').textContent = profile.medicalHistory?.pastSurgeries || '-';
+
+                    // Insurance
+                    document.getElementById('modalInsuranceProvider').textContent = profile.insuranceInfo?.provider || '-';
+                    document.getElementById('modalPolicyNumber').textContent = profile.insuranceInfo?.policyNumber || '-';
+                    document.getElementById('modalGroupNumber').textContent = profile.insuranceInfo?.groupNumber || '-';
+
+                    // Show the modal
+                    document.getElementById('patientDetailsModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching patient details:', error);
+                alert('Error fetching patient details');
+            }
+        }
+
+        // Function to close the patient details modal
+        function closePatientModal() {
+            document.getElementById('patientDetailsModal').classList.add('hidden');
+        }
+
+        // Update the displayPatients function to add the view details button
+        function displayPatients(patients) {
+            const patientsList = document.getElementById('patientsList');
+            patientsList.innerHTML = '';
+
+            patients.forEach(patient => {
+                const patientCard = document.createElement('div');
+                patientCard.className = 'bg-white p-4 rounded-lg shadow flex justify-between items-center';
+                patientCard.innerHTML = `
+                    <div>
+                        <h3 class="text-lg font-semibold">${patient.username}</h3>
+                        <p class="text-gray-600">${patient.email}</p>
+                    </div>
+                    <button onclick="viewPatientDetails('${patient._id}')" 
+                        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        View Details
+                    </button>
+                `;
+                patientsList.appendChild(patientCard);
+            });
+        }
+    </script>
 </body>
 </html> 

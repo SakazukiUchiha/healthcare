@@ -54,7 +54,7 @@
             <nav class="bg-blue-600 p-4">
                 <div class="container mx-auto flex justify-between items-center">
                     <h1 class="text-white text-2xl font-bold">Appointments</h1>
-                    <button onclick="location.href='login.html'" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
+                    <button onclick="logout()" class="bg-white text-blue-600 px-4 py-2 rounded">Logout</button>
                 </div>
             </nav>
             <main class="container mx-auto mt-8 p-4">
@@ -62,12 +62,44 @@
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h2 class="text-xl font-bold mb-4">Schedule New Appointment</h2>
                         <form id="appointmentForm" class="space-y-4">
-                            <div>
-                                <label class="block text-gray-700 mb-2">Select Doctor</label>
+                            <div class="mb-6">
+                                <label class="block text-gray-700 mb-2">Select Healthcare Provider</label>
                                 <select id="doctorSelect" class="w-full p-2 border rounded" required>
-                                    <option value="">Select a doctor...</option>
+                                    <option value="">Select a provider</option>
                                 </select>
                             </div>
+
+                            <!-- Add Provider Information Section -->
+                            <div id="providerInfo" class="mb-6 hidden bg-gray-50 p-4 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3">Provider Information</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-gray-600">Name</p>
+                                        <p id="providerName" class="font-medium">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Specialization</p>
+                                        <p id="providerSpecialization" class="font-medium">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Phone</p>
+                                        <p id="providerPhone" class="font-medium">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Office Address</p>
+                                        <p id="providerAddress" class="font-medium">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Medical School</p>
+                                        <p id="providerSchool" class="font-medium">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600">Board Certifications</p>
+                                        <p id="providerCertifications" class="font-medium">-</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div>
                                 <label class="block text-gray-700 mb-2">Select Date</label>
                                 <input type="date" id="appointmentDate" class="w-full p-2 border rounded" required>
@@ -250,9 +282,56 @@
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('appointmentDate').min = today;
 
+        // Add event listener for doctor selection
+        document.getElementById('doctorSelect').addEventListener('change', async function() {
+            const selectedDoctorId = this.value;
+            const providerInfoDiv = document.getElementById('providerInfo');
+            
+            if (!selectedDoctorId) {
+                providerInfoDiv.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/provider-profile/${selectedDoctorId}`);
+                const providerProfile = await response.json();
+
+                if (response.ok) {
+                    // Update provider information
+                    document.getElementById('providerName').textContent = 
+                        `${providerProfile.firstName} ${providerProfile.lastName}`;
+                    document.getElementById('providerSpecialization').textContent = 
+                        providerProfile.specialization || '-';
+                    document.getElementById('providerPhone').textContent = 
+                        providerProfile.phone || '-';
+                    document.getElementById('providerAddress').textContent = 
+                        providerProfile.officeAddress || '-';
+                    document.getElementById('providerSchool').textContent = 
+                        providerProfile.medicalSchool || '-';
+                    document.getElementById('providerCertifications').textContent = 
+                        providerProfile.boardCertifications || '-';
+
+                    // Show the provider info section
+                    providerInfoDiv.classList.remove('hidden');
+                } else {
+                    console.error('Failed to fetch provider profile');
+                    providerInfoDiv.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching provider profile:', error);
+                providerInfoDiv.classList.add('hidden');
+            }
+        });
+
         // Initialize
         fetchDoctors();
         fetchAppointments();
+
+        // Add logout function
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
     </script>
 </body>
 </html> 

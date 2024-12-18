@@ -75,8 +75,8 @@
                                 <button onclick="changeDate(1)" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Next Day</button>
                             </div>
                         </div>
-                        <div id="appointments-container" class="space-y-4">
-                            <!-- Appointments will be dynamically inserted here -->
+                        <div id="appointmentsList" class="space-y-4">
+                            <!-- Appointments will be added here -->
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
@@ -124,6 +124,105 @@
         </div>
     </div>
 
+    <!-- Patient Details Modal -->
+    <div id="patientDetailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-4/5 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold" id="modalPatientName">Patient Details</h3>
+                <button onclick="closePatientModal()" class="text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Personal Information -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Personal Information</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-600">Date of Birth</p>
+                            <p id="modalDOB" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Gender</p>
+                            <p id="modalGender" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Phone</p>
+                            <p id="modalPhone" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Address</p>
+                            <p id="modalAddress" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Emergency Contact</h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-gray-600">Name</p>
+                            <p id="modalEmergencyName" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Relationship</p>
+                            <p id="modalEmergencyRelationship" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Phone</p>
+                            <p id="modalEmergencyPhone" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical History -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Medical History</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-600">Allergies</p>
+                            <p id="modalAllergies" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Chronic Conditions</p>
+                            <p id="modalChronicConditions" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Current Medications</p>
+                            <p id="modalMedications" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Past Surgeries</p>
+                            <p id="modalSurgeries" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insurance Information -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">Insurance Information</h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-gray-600">Provider</p>
+                            <p id="modalInsuranceProvider" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Policy Number</p>
+                            <p id="modalPolicyNumber" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Group Number</p>
+                            <p id="modalGroupNumber" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentDate = new Date();
         const providerId = localStorage.getItem('userId');
@@ -163,34 +262,34 @@
         }
 
         function displayAppointments(appointments) {
-            const container = document.getElementById('appointments-container');
-            container.innerHTML = '';
+            const appointmentsList = document.getElementById('appointmentsList');
+            appointmentsList.innerHTML = '';
 
             if (appointments.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center py-4">No appointments scheduled for this day.</p>';
+                appointmentsList.innerHTML = '<p class="text-gray-500 text-center">No appointments scheduled for this date.</p>';
                 return;
             }
 
             appointments.forEach(appointment => {
                 const appointmentTime = new Date(appointment.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const appointmentDiv = document.createElement('div');
-                appointmentDiv.className = 'border-b pb-4';
-                appointmentDiv.innerHTML = `
-                    <div class="flex justify-between items-start">
+                const appointmentCard = document.createElement('div');
+                appointmentCard.className = 'bg-white p-4 rounded-lg shadow';
+                appointmentCard.innerHTML = `
+                    <div class="flex justify-between items-center">
                         <div>
-                            <p class="font-semibold">${appointmentTime} - ${appointment.patientName}</p>
-                            <p class="text-gray-600">${appointment.reason}</p>
-                            <p class="text-gray-600">Patient ID: #${appointment.patientId}</p>
+                            <h3 class="text-lg font-semibold">${appointment.patientName}</h3>
+                            <p class="text-gray-600">Time: ${appointmentTime}</p>
+                            <p class="text-gray-600">Type: ${appointment.reason}</p>
                         </div>
                         <div class="flex space-x-2">
-                            <button onclick="viewAppointmentDetails('${appointment._id}')" 
-                                    class="text-green-600 hover:text-green-800">View Details</button>
-                            <button onclick="cancelAppointment('${appointment._id}')" 
-                                    class="text-red-600 hover:text-red-800">Cancel</button>
+                            <button onclick="viewPatientDetails('${appointment.patientId}')" 
+                                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                                View Details
+                            </button>
                         </div>
                     </div>
                 `;
-                container.appendChild(appointmentDiv);
+                appointmentsList.appendChild(appointmentCard);
             });
         }
 
@@ -222,9 +321,48 @@
             }
         }
 
-        function viewAppointmentDetails(appointmentId) {
-            // This function can be implemented later to show more details or redirect to a detailed view
-            alert('Viewing appointment details - Feature coming soon');
+        // Function to view patient details
+        async function viewPatientDetails(patientId) {
+            try {
+                const response = await fetch(`/api/patient-profile/${patientId}`);
+                const profile = await response.json();
+
+                if (response.ok) {
+                    // Update modal with patient information
+                    document.getElementById('modalPatientName').textContent = `${profile.firstName} ${profile.lastName}`;
+                    document.getElementById('modalDOB').textContent = profile.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : '-';
+                    document.getElementById('modalGender').textContent = profile.gender || '-';
+                    document.getElementById('modalPhone').textContent = profile.phone || '-';
+                    document.getElementById('modalAddress').textContent = profile.address || '-';
+
+                    // Emergency Contact
+                    document.getElementById('modalEmergencyName').textContent = profile.emergencyContact?.name || '-';
+                    document.getElementById('modalEmergencyRelationship').textContent = profile.emergencyContact?.relationship || '-';
+                    document.getElementById('modalEmergencyPhone').textContent = profile.emergencyContact?.phone || '-';
+
+                    // Medical History
+                    document.getElementById('modalAllergies').textContent = profile.medicalHistory?.allergies || '-';
+                    document.getElementById('modalChronicConditions').textContent = profile.medicalHistory?.chronicConditions || '-';
+                    document.getElementById('modalMedications').textContent = profile.medicalHistory?.currentMedications || '-';
+                    document.getElementById('modalSurgeries').textContent = profile.medicalHistory?.pastSurgeries || '-';
+
+                    // Insurance
+                    document.getElementById('modalInsuranceProvider').textContent = profile.insuranceInfo?.provider || '-';
+                    document.getElementById('modalPolicyNumber').textContent = profile.insuranceInfo?.policyNumber || '-';
+                    document.getElementById('modalGroupNumber').textContent = profile.insuranceInfo?.groupNumber || '-';
+
+                    // Show the modal
+                    document.getElementById('patientDetailsModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching patient details:', error);
+                alert('Error fetching patient details');
+            }
+        }
+
+        // Function to close the patient details modal
+        function closePatientModal() {
+            document.getElementById('patientDetailsModal').classList.add('hidden');
         }
     </script>
 </body>
