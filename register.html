@@ -31,17 +31,57 @@
                 <select class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="role">
                     <option value="">Select a role</option>
                     <option value="patient">Patient</option>
-                    <option value="clinic-staff">Clinic Staff</option>
                     <option value="healthcare-provider">Healthcare Provider</option>
                 </select>
             </div>
             <div class="flex items-center justify-center">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
                     Create Account
                 </button>
             </div>
         </form>
         <p class="mt-4 text-center text-gray-600">Already have an account? <a href="login.html" class="text-blue-600 hover:text-blue-800">Login here</a></p>
     </div>
+    <script>
+    document.querySelector('form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Add validation for password confirmation
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        
+        if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+            return;
+        }
+        
+        const userData = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: password,
+            role: document.getElementById('role').value
+        };
+    
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+    
+            const data = await response.json();
+            if (response.ok) {
+                alert('Registration successful! Redirecting to login page...');
+                window.location.href = '/login.html';
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            alert('Registration failed');
+        }
+    });
+    </script>
 </body>
 </html>
