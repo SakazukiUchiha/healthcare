@@ -218,14 +218,16 @@
             }
 
             try {
-                const response = await fetch(`/api/appointments/${appointmentId}/cancel`, {
-                    method: 'PUT'
+                const response = await fetch(`/api/appointments/${appointmentId}?cancelledBy=patient`, {
+                    method: 'DELETE'
                 });
 
                 if (response.ok) {
+                    alert('Appointment cancelled successfully');
                     fetchAppointments();
                 } else {
-                    alert('Failed to cancel appointment');
+                    const data = await response.json();
+                    alert(`Failed to cancel appointment: ${data.message}`);
                 }
             } catch (error) {
                 console.error('Error cancelling appointment:', error);

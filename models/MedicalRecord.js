@@ -1,15 +1,19 @@
 const mongoose = require('mongoose');
 
 const medicalRecordSchema = new mongoose.Schema({
-    patientId: { 
-        type: mongoose.Schema.Types.ObjectId, 
+    patientId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true 
+        required: true
     },
-    doctorId: { 
-        type: mongoose.Schema.Types.ObjectId, 
+    doctorId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true 
+        required: true
+    },
+    date: {
+        type: Date,
+        default: Date.now
     },
     recordType: {
         type: String,
@@ -19,21 +23,8 @@ const medicalRecordSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    prescription: {
-        type: String
-    },
-    notes: {
-        type: String
-    },
-    date: {
-        type: Date,
-        default: Date.now
-    },
-    status: {
-        type: String,
-        enum: ['active', 'archived'],
-        default: 'active'
-    }
+    prescription: String,
+    notes: String
 });
 
 module.exports = mongoose.model('MedicalRecord', medicalRecordSchema); 
