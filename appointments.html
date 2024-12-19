@@ -108,21 +108,27 @@
                                 <label class="block text-gray-700 mb-2">Select Time</label>
                                 <select id="appointmentTime" class="w-full p-2 border rounded" required>
                                     <option value="">Select a time...</option>
+                                    <option value="07:00 AM">07:00 AM</option>
+                                    <option value="07:30 AM">07:30 AM</option>
+                                    <option value="08:00 AM">08:00 AM</option>
+                                    <option value="08:30 AM">08:30 AM</option>
                                     <option value="09:00 AM">09:00 AM</option>
+                                    <option value="09:30 AM">09:30 AM</option>
                                     <option value="10:00 AM">10:00 AM</option>
+                                    <option value="10:30 AM">10:30 AM</option>
                                     <option value="11:00 AM">11:00 AM</option>
+                                    <option value="11:30 AM">11:30 AM</option>
                                     <option value="12:00 PM">12:00 PM</option>
+                                    <option value="12:30 PM">12:30 PM</option>
                                     <option value="01:00 PM">01:00 PM</option>
+                                    <option value="01:30 PM">01:30 PM</option>
                                     <option value="02:00 PM">02:00 PM</option>
+                                    <option value="02:30 PM">02:30 PM</option>
                                     <option value="03:00 PM">03:00 PM</option>
+                                    <option value="03:30 PM">03:30 PM</option>
                                     <option value="04:00 PM">04:00 PM</option>
+                                    <option value="04:30 PM">04:30 PM</option>
                                     <option value="05:00 PM">05:00 PM</option>
-                                    <option value="06:00 PM">06:00 PM</option>
-                                    <option value="07:00 PM">07:00 PM</option>
-                                    <option value="08:00 PM">08:00 PM</option>
-                                    <option value="09:00 PM">09:00 PM</option>
-                                    <option value="10:00 PM">10:00 PM</option>
-                                    <option value="11:00 PM">11:00 PM</option>
                                 </select>
                             </div>
                             <div>
@@ -197,10 +203,16 @@
                             <p class="font-semibold">Dr. ${appointment.doctorId.username}</p>
                             <p class="text-gray-600">Date: ${appointmentDate.toLocaleDateString()}</p>
                             <p class="text-gray-600">Time: ${appointmentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            <button onclick="cancelAppointment('${appointment._id}')" 
-                                    class="mt-2 text-red-600 hover:text-red-800">
-                                Cancel Appointment
-                            </button>
+                            <div class="mt-2 flex space-x-4">
+                                <button onclick="rescheduleAppointment('${appointment._id}', '${appointment.doctorId._id}', '${appointment.type}')" 
+                                        class="text-blue-600 hover:text-blue-800">
+                                    Reschedule
+                                </button>
+                                <button onclick="cancelAppointment('${appointment._id}')" 
+                                        class="text-red-600 hover:text-red-800">
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -233,6 +245,90 @@
                 console.error('Error cancelling appointment:', error);
                 alert('Error cancelling appointment');
             }
+        }
+
+        // Add reschedule function
+        async function rescheduleAppointment(appointmentId, doctorId, appointmentType) {
+            // Pre-fill the appointment form with the existing appointment details
+            document.getElementById('doctorSelect').value = doctorId;
+            document.getElementById('appointmentType').value = appointmentType;
+
+            // Scroll to the appointment form
+            document.getElementById('appointmentForm').scrollIntoView({ behavior: 'smooth' });
+
+            // Update form submission to handle rescheduling
+            const form = document.getElementById('appointmentForm');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+
+                const date = document.getElementById('appointmentDate').value;
+                const time = document.getElementById('appointmentTime').value;
+                
+                // Combine date and time into a single dateTime
+                const [hours, minutes, period] = time.match(/(\d+):(\d+) (AM|PM)/).slice(1);
+                let hour = parseInt(hours);
+                if (period === 'PM' && hour !== 12) hour += 12;
+                if (period === 'AM' && hour === 12) hour = 0;
+                const dateTime = new Date(`${date}T${hour.toString().padStart(2, '0')}:${minutes}:00`);
+
+                try {
+                    // First cancel the old appointment
+                    const cancelResponse = await fetch(`/api/appointments/${appointmentId}?cancelledBy=patient`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!cancelResponse.ok) {
+                        throw new Error('Failed to cancel old appointment');
+                    }
+
+                    // Then create the new appointment
+                    const response = await fetch('/api/appointments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            patientId: userId,
+                            doctorId: doctorId,
+                            dateTime: dateTime.toISOString(),
+                            type: appointmentType
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // Send notification to provider about the rescheduled appointment
+                        const notificationResponse = await fetch('/api/notifications', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                userId: doctorId,
+                                type: 'appointment_cancelled',
+                                message: `Patient has rescheduled their appointment to ${new Date(dateTime).toLocaleDateString()} at ${new Date(dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                                appointmentId: data.appointmentId // This will be the new appointment ID
+                            })
+                        });
+
+                        if (!notificationResponse.ok) {
+                            console.error('Failed to send notification to provider');
+                        }
+
+                        alert('Appointment rescheduled successfully');
+                        form.reset();
+                        // Reset the form submission handler
+                        form.onsubmit = null;
+                        fetchAppointments();
+                    } else {
+                        alert(data.message || 'Failed to reschedule appointment');
+                    }
+                } catch (error) {
+                    console.error('Error rescheduling appointment:', error);
+                    alert('Error rescheduling appointment');
+                }
+            };
         }
 
         // Handle form submission
