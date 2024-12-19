@@ -30,6 +30,59 @@ mongoose.connect('mongodb://127.0.0.1:27017/healthcare', {
     app.listen(PORT, () => {
         console.log(`Server is running at http://localhost:${PORT}`);
     });
+
+    // Function to check for upcoming appointments and send reminders
+    async function checkUpcomingAppointments() {
+        try {
+            // Get current time
+            const now = new Date();
+            // Get appointments in the next hour
+            const endTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+
+            const upcomingAppointments = await Appointment.find({
+                dateTime: { $gt: now, $lte: endTime },
+                status: 'accepted',
+                reminderSent: { $ne: true } // Only send reminder once
+            }).populate('patientId', 'username')
+              .populate('doctorId', 'username');
+
+            for (const appointment of upcomingAppointments) {
+                const appointmentTime = new Date(appointment.dateTime);
+                const timeDiff = appointmentTime.getTime() - now.getTime();
+                const minutesDiff = Math.floor(timeDiff / (1000 * 60));
+
+                // Send reminder if appointment is within 30-60 minutes
+                if (minutesDiff <= 60 && minutesDiff >= 30) {
+                    // Create notification for patient
+                    const patientNotification = new Notification({
+                        userId: appointment.patientId._id,
+                        type: 'appointment_reminder',
+                        message: `Reminder: You have an appointment with Dr. ${appointment.doctorId.username} at ${appointmentTime.toLocaleTimeString()}`,
+                        appointmentId: appointment._id
+                    });
+                    await patientNotification.save();
+
+                    // Create notification for provider
+                    const providerNotification = new Notification({
+                        userId: appointment.doctorId._id,
+                        type: 'appointment_reminder',
+                        message: `Reminder: You have an appointment with ${appointment.patientId.username} at ${appointmentTime.toLocaleTimeString()}`,
+                        appointmentId: appointment._id
+                    });
+                    await providerNotification.save();
+
+                    // Mark appointment as reminder sent
+                    appointment.reminderSent = true;
+                    await appointment.save();
+                }
+            }
+        } catch (error) {
+            console.error('Error checking upcoming appointments:', error);
+        }
+    }
+
+    // Set up interval to check for upcoming appointments every minute
+    setInterval(checkUpcomingAppointments, 60000); // Check every minute
 })
 .catch(err => {
     console.error('Failed to connect to MongoDB. Error:', err);
@@ -191,7 +244,10 @@ app.post('/api/appointments', async (req, res) => {
 
         await notification.save();
 
-        res.status(201).json({ message: 'Appointment scheduled successfully' });
+        res.status(201).json({ 
+            message: 'Appointment scheduled successfully',
+            appointmentId: appointment._id
+        });
     } catch (error) {
         console.error('Error creating appointment:', error);
         res.status(500).json({ message: 'Error scheduling appointment' });
@@ -878,8 +934,9 @@ app.put('/api/appointments/:appointmentId/accept', async (req, res) => {
             return res.status(400).json({ message: 'Cannot accept a cancelled appointment' });
         }
 
-        // Update appointment status
+        // Update appointment status and reset reminder flag
         appointment.status = 'accepted';
+        appointment.reminderSent = false; // Reset reminder flag when accepting appointment
         await appointment.save();
 
         // Create notification for the patient
