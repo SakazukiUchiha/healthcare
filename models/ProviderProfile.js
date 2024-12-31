@@ -13,7 +13,6 @@ const providerProfileSchema = new mongoose.Schema({
     licenseNumber: { type: String, required: true },
     phone: { type: String, required: true },
     officeAddress: { type: String, required: true },
-    medicalSchool: { type: String, required: true },
     profileCompleted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -25,4 +24,4 @@ providerProfileSchema.pre('save', function(next) {
     next();
 });
 
-module.exports = mongoose.model('ProviderProfile', providerProfileSchema); 
+module.exports = mongoose.model('ProviderProfile', providerProfileSchema);

@@ -143,13 +143,19 @@
                     return;
                 }
 
+                // Sort records by date, newest first
+                records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
                 recordsList.innerHTML = records.map(record => `
-                    <div class="border p-4 rounded-lg hover:bg-gray-50">
+                    <div class="border p-4 rounded-lg hover:bg-gray-50 mb-4">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-semibold">Dr. ${record.doctorId.username}</h3>
                                 <p class="text-gray-600">Date: ${new Date(record.date).toLocaleDateString()}</p>
                                 <p class="text-gray-600">Type: ${record.recordType}</p>
+                                <p class="text-gray-600">Diagnosis: ${record.diagnosis}</p>
+                                ${record.prescription ? `<p class="text-gray-600">Prescription: ${record.prescription}</p>` : ''}
+                                ${record.notes ? `<p class="text-gray-600">Notes: ${record.notes}</p>` : ''}
                             </div>
                             <button onclick="viewRecordDetails('${record._id}')"
                                     class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
@@ -176,8 +182,8 @@
                     document.getElementById('modalDate').textContent = new Date(record.date).toLocaleDateString();
                     document.getElementById('modalType').textContent = record.recordType;
                     document.getElementById('modalDiagnosis').textContent = record.diagnosis;
-                    document.getElementById('modalPrescription').textContent = record.prescription;
-                    document.getElementById('modalNotes').textContent = record.notes;
+                    document.getElementById('modalPrescription').textContent = record.prescription || '-';
+                    document.getElementById('modalNotes').textContent = record.notes || '-';
 
                     document.getElementById('recordModal').classList.remove('hidden');
                 }

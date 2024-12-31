@@ -102,11 +102,6 @@
                                         <input type="text" id="officeAddress" class="w-full p-2 border rounded" 
                                             placeholder="Enter your office/clinic address" required>
                                     </div>
-                                    <div>
-                                        <label class="block text-gray-700 mb-2">Medical School</label>
-                                        <input type="text" id="medicalSchool" class="w-full p-2 border rounded" 
-                                            placeholder="Enter your medical school name" required>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -154,7 +149,6 @@
                     document.getElementById('licenseNumber').value = profile.licenseNumber || '';
                     document.getElementById('phone').value = profile.phone || '';
                     document.getElementById('officeAddress').value = profile.officeAddress || '';
-                    document.getElementById('medicalSchool').value = profile.medicalSchool || '';
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
@@ -172,8 +166,7 @@
                 specialization: document.getElementById('specialization').value,
                 licenseNumber: document.getElementById('licenseNumber').value,
                 phone: document.getElementById('phone').value,
-                officeAddress: document.getElementById('officeAddress').value,
-                medicalSchool: document.getElementById('medicalSchool').value
+                officeAddress: document.getElementById('officeAddress').value
             };
 
             try {
@@ -199,4 +192,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

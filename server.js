@@ -622,7 +622,6 @@ app.put('/api/provider-profile/:providerId', async (req, res) => {
             licenseNumber, 
             phone, 
             officeAddress,
-            medicalSchool,
             graduationYear,
             boardCertifications 
         } = req.body;
@@ -647,7 +646,6 @@ app.put('/api/provider-profile/:providerId', async (req, res) => {
                     licenseNumber,
                     phone,
                     officeAddress,
-                    medicalSchool,
                     graduationYear,
                     boardCertifications,
                     profileCompleted: true
@@ -664,7 +662,6 @@ app.put('/api/provider-profile/:providerId', async (req, res) => {
                 licenseNumber,
                 phone,
                 officeAddress,
-                medicalSchool,
                 graduationYear,
                 boardCertifications,
                 profileCompleted: true
@@ -700,7 +697,6 @@ app.get('/api/provider-profile/:providerId', async (req, res) => {
                 licenseNumber: '',
                 phone: '',
                 officeAddress: '',
-                medicalSchool: '',
                 graduationYear: '',
                 boardCertifications: ''
             });

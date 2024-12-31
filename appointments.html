@@ -89,10 +89,6 @@
                                         <p class="text-gray-600">Office Address</p>
                                         <p id="providerAddress" class="font-medium">-</p>
                                     </div>
-                                    <div>
-                                        <p class="text-gray-600">Medical School</p>
-                                        <p id="providerSchool" class="font-medium">-</p>
-                                    </div>
                                 </div>
                             </div>
 
@@ -454,8 +450,6 @@
                         providerProfile.phone || '-';
                     document.getElementById('providerAddress').textContent = 
                         providerProfile.officeAddress || '-';
-                    document.getElementById('providerSchool').textContent = 
-                        providerProfile.medicalSchool || '-';
 
                     // Show the provider info section
                     providerInfoDiv.classList.remove('hidden');
@@ -480,4 +474,4 @@
         }
     </script>
 </body>
-</html> 
+</html>
