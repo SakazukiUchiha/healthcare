@@ -13,8 +13,6 @@ const userSchema = new mongoose.Schema({
     phone: { type: String },
     officeAddress: { type: String },
     medicalSchool: { type: String },
-    graduationYear: { type: String },
-    boardCertifications: { type: String },
     profileCompleted: { type: Boolean, default: false }
 });
 

@@ -93,10 +93,6 @@
                                         <p class="text-gray-600">Medical School</p>
                                         <p id="providerSchool" class="font-medium">-</p>
                                     </div>
-                                    <div>
-                                        <p class="text-gray-600">Board Certifications</p>
-                                        <p id="providerCertifications" class="font-medium">-</p>
-                                    </div>
                                 </div>
                             </div>
 
@@ -316,6 +312,32 @@
                             console.error('Failed to send notification to provider');
                         }
 
+                        // Create report for the rescheduled appointment
+                        const reportData = {
+                            appointmentId: data.appointmentId,
+                            patientId: userId,
+                            doctorId: doctorId,
+                            patientName: localStorage.getItem('username'),
+                            doctorName: document.getElementById('doctorSelect').options[document.getElementById('doctorSelect').selectedIndex].text,
+                            appointmentType: appointmentType,
+                            appointmentDate: dateTime,
+                            status: 'scheduled',
+                            bookedBy: localStorage.getItem('username')
+                        };
+
+                        // Save the report
+                        const reportResponse = await fetch('/api/reports', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(reportData)
+                        });
+
+                        if (!reportResponse.ok) {
+                            console.error('Failed to create report for rescheduled appointment');
+                        }
+
                         alert('Appointment rescheduled successfully');
                         form.reset();
                         // Reset the form submission handler
@@ -364,9 +386,37 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Appointment scheduled successfully');
-                    document.getElementById('appointmentForm').reset();
-                    fetchAppointments();
+                    // Create report for the new appointment
+                    const reportData = {
+                        appointmentId: data.appointmentId,
+                        patientId: userId,
+                        doctorId: appointmentData.doctorId,
+                        patientName: localStorage.getItem('username'),
+                        doctorName: document.getElementById('doctorSelect').options[document.getElementById('doctorSelect').selectedIndex].text,
+                        appointmentType: appointmentData.type,
+                        appointmentDate: dateTime,
+                        status: 'scheduled',
+                        bookedBy: localStorage.getItem('username')
+                    };
+
+                    console.log('Creating report with data:', reportData);
+
+                    const reportResponse = await fetch('/api/reports', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(reportData)
+                    });
+
+                    if (!reportResponse.ok) {
+                        console.error('Failed to create report:', await reportResponse.json());
+                    } else {
+                        console.log('Report created successfully');
+                        alert('Appointment scheduled successfully');
+                        document.getElementById('appointmentForm').reset();
+                        fetchAppointments();
+                    }
                 } else {
                     alert(data.message || 'Failed to schedule appointment');
                 }
@@ -406,8 +456,6 @@
                         providerProfile.officeAddress || '-';
                     document.getElementById('providerSchool').textContent = 
                         providerProfile.medicalSchool || '-';
-                    document.getElementById('providerCertifications').textContent = 
-                        providerProfile.boardCertifications || '-';
 
                     // Show the provider info section
                     providerInfoDiv.classList.remove('hidden');

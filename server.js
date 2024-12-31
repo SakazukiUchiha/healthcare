@@ -9,6 +9,7 @@ const ProviderProfile = require('./models/ProviderProfile');
 const PatientProfile = require('./models/PatientProfile');
 const Notification = require('./models/Notification');
 const ProviderSchedule = require('./models/ProviderSchedule');
+const Report = require('./models/Report');
 const app = express();
 
 // Define PORT first
@@ -219,38 +220,33 @@ app.post('/api/appointments', async (req, res) => {
             return res.status(400).json({ message: 'This time slot is already booked' });
         }
 
-        // Get patient details for notification
-        const patient = await User.findById(patientId).select('username');
-        if (!patient) {
-            return res.status(400).json({ message: 'Patient not found' });
-        }
-
         const appointment = new Appointment({
             patientId,
             doctorId,
             dateTime: appointmentTime,
-            type
+            type,
+            status: 'scheduled'
         });
 
-        await appointment.save();
+        const savedAppointment = await appointment.save();
 
         // Create notification for the provider
         const notification = new Notification({
             userId: doctorId,
             type: 'new_appointment',
-            message: `New appointment booked by ${patient.username} for ${type} on ${appointmentTime.toLocaleDateString()} at ${appointmentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-            appointmentId: appointment._id
+            message: `New appointment booked for ${type} on ${appointmentTime.toLocaleDateString()} at ${appointmentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+            appointmentId: savedAppointment._id
         });
 
         await notification.save();
 
         res.status(201).json({ 
-            message: 'Appointment scheduled successfully',
-            appointmentId: appointment._id
+            message: 'Appointment created successfully',
+            appointmentId: savedAppointment._id 
         });
     } catch (error) {
         console.error('Error creating appointment:', error);
-        res.status(500).json({ message: 'Error scheduling appointment' });
+        res.status(500).json({ message: 'Error creating appointment', error: error.message });
     }
 });
 
@@ -299,6 +295,12 @@ app.delete('/api/appointments/:appointmentId', async (req, res) => {
         // Update appointment status
         appointment.status = 'cancelled';
         await appointment.save();
+
+        // Update the corresponding report status
+        await Report.findOneAndUpdate(
+            { appointmentId: appointment._id },
+            { status: 'cancelled' }
+        );
 
         // Get the user who initiated the cancellation from the request headers or query
         const cancelledBy = req.query.cancelledBy || req.headers['x-cancelled-by'];
@@ -399,6 +401,12 @@ app.post('/api/medical-records', async (req, res) => {
             // Mark appointment as completed
             appointment.status = 'completed';
             await appointment.save();
+
+            // Update the corresponding report status
+            await Report.findOneAndUpdate(
+                { appointmentId: appointment._id },
+                { status: 'completed' }
+            );
 
             // Create notification for the patient
             const notification = new Notification({
@@ -939,6 +947,12 @@ app.put('/api/appointments/:appointmentId/accept', async (req, res) => {
         appointment.reminderSent = false; // Reset reminder flag when accepting appointment
         await appointment.save();
 
+        // Update the corresponding report status
+        await Report.findOneAndUpdate(
+            { appointmentId: appointment._id },
+            { status: 'accepted' }
+        );
+
         // Create notification for the patient
         const notification = new Notification({
             userId: appointment.patientId._id,
@@ -1026,6 +1040,91 @@ app.post('/api/provider-schedule', async (req, res) => {
     } catch (error) {
         console.error('Error updating provider schedule:', error);
         res.status(500).json({ message: 'Error updating schedule' });
+    }
+});
+
+// Get reports with filters
+app.get('/api/reports', async (req, res) => {
+    try {
+        const { dateRange, status, search } = req.query;
+        let query = {};
+
+        // Apply date range filter
+        if (dateRange) {
+            const now = new Date();
+            let startDate = new Date();
+            
+            switch(dateRange) {
+                case 'today':
+                    startDate.setHours(0, 0, 0, 0);
+                    break;
+                case 'week':
+                    startDate.setDate(now.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setMonth(now.getMonth() - 1);
+                    break;
+            }
+            
+            if (dateRange !== 'all') {
+                query.appointmentDate = { $gte: startDate };
+            }
+        }
+
+        // Apply status filter
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
+        // Apply search filter
+        if (search) {
+            query.$or = [
+                { patientName: { $regex: search, $options: 'i' } },
+                { doctorName: { $regex: search, $options: 'i' } },
+                { appointmentType: { $regex: search, $options: 'i' } },
+                { bookedBy: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        console.log('Fetching reports with query:', query); // Add logging
+
+        const reports = await Report.find(query)
+            .sort({ appointmentDate: -1 });
+
+        console.log('Found reports:', reports.length); // Add logging
+
+        res.json(reports);
+    } catch (error) {
+        console.error('Error fetching reports:', error);
+        res.status(500).json({ message: 'Error fetching reports' });
+    }
+});
+
+// Create new report
+app.post('/api/reports', async (req, res) => {
+    try {
+        console.log('Received report data:', req.body);
+        
+        // Validate required fields
+        const requiredFields = ['appointmentId', 'patientId', 'doctorId', 'patientName', 'doctorName', 'appointmentType', 'appointmentDate', 'status', 'bookedBy'];
+        for (const field of requiredFields) {
+            if (!req.body[field]) {
+                return res.status(400).json({ message: `Missing required field: ${field}` });
+            }
+        }
+
+        const report = new Report(req.body);
+        const savedReport = await report.save();
+        
+        console.log('Report saved:', savedReport);
+        
+        res.status(201).json({ 
+            message: 'Report created successfully',
+            reportId: savedReport._id 
+        });
+    } catch (error) {
+        console.error('Error creating report:', error);
+        res.status(500).json({ message: 'Error creating report', error: error.message });
     }
 });
 

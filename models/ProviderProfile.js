@@ -14,8 +14,6 @@ const providerProfileSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     officeAddress: { type: String, required: true },
     medicalSchool: { type: String, required: true },
-    graduationYear: { type: String, required: true },
-    boardCertifications: { type: String, required: true },
     profileCompleted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

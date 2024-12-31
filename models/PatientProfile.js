@@ -24,11 +24,6 @@ const patientProfileSchema = new mongoose.Schema({
         currentMedications: { type: String, default: 'None' },
         pastSurgeries: { type: String, default: 'None' }
     },
-    insuranceInfo: {
-        provider: { type: String, required: true },
-        policyNumber: { type: String, required: true },
-        groupNumber: { type: String, required: true }
-    },
     profileCompleted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
